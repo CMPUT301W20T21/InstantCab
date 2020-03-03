@@ -41,7 +41,7 @@ public class EnterRouteActivity extends AppCompatActivity {
 
         start_location = findViewById(R.id.start_location);
 
-        Places.initialize(getApplicationContext(), "AIzaSyB3pJ8XeAILHM2w5hLwh7LYxjhg7Th6r_E");
+        Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
         start_location.setOnClickListener(new View.OnClickListener() {
             @Override
