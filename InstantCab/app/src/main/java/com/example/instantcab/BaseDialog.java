@@ -1,4 +1,4 @@
-package com.instantcab.example.dialog;
+package com.instantcab.example;
 
 import android.app.Dialog;
 import android.content.Context;
