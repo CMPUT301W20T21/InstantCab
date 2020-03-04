@@ -54,7 +54,7 @@ public class EnterRouteActivity extends AppCompatActivity {
         });
 
         // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+        final AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
         autocompleteFragment.setActivityMode(AutocompleteActivityMode.FULLSCREEN);
         autocompleteFragment.setHint("Enter a destination");
@@ -70,6 +70,8 @@ public class EnterRouteActivity extends AppCompatActivity {
                 // TODO: Get info about the selected place.
                 LatLng res = place.getLatLng();
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+
+                String add = autocompleteFragment.getString(0);
 
                 Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
                 Bundle bundle = new Bundle();
