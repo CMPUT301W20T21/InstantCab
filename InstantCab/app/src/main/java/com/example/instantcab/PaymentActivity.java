@@ -49,8 +49,6 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Click to pay
-                // jump to another payment activity with QR code and ratings
-                
                 //Intent intent = new Intent(PaymentActivity.this, anotherPaymentActivity.class);
                 //intent.putExtra("FARE", total);
                 //startActivity(intent);

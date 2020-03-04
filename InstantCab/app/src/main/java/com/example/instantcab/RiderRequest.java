@@ -8,6 +8,15 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Calendar;
+import java.util.Date;
+
 public class RiderRequest extends AppCompatActivity {
     private Button ButtonCancelRequest;
     private Button ButtonConfirmRequest;
@@ -19,6 +28,8 @@ public class RiderRequest extends AppCompatActivity {
     private Boolean driverAccept;
     private String driverName;
     private String fare;
+    private FirebaseAuth mAuth;
+    private FirebaseDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +49,25 @@ public class RiderRequest extends AppCompatActivity {
         showFare = findViewById(R.id.fare);
         showFare.setText("$"+fare);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseDatabase.getInstance();
+        final FirebaseUser user = mAuth.getCurrentUser();
+        final DatabaseReference request = db.getReference("server/saving-data/requests");
+
+        Date currentTime = Calendar.getInstance().getTime();
+        request.child("rider").setValue(user.getDisplayName());
+        request.child("time").setValue(currentTime.toString());
+        request.child("status").setValue("pending");
+
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
+                request.child("status").setValue("cancelled");
                 // need to notify the driver
 
                 // move back to the map activity
-
+                Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
             }
         });
 
@@ -53,6 +75,10 @@ public class RiderRequest extends AppCompatActivity {
             driverStatus.setText("Driver picked up request");
             showDriver.setText(driverName);
             ButtonConfirmRequest.setVisibility(View.VISIBLE);
+            request.child("status").setValue("accepted");
+            request.child("driver").setValue(driverName);
+
+            // need the app to fire a notification
         }
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +88,7 @@ public class RiderRequest extends AppCompatActivity {
                 ButtonPickedUp.setVisibility(View.VISIBLE);
                 ButtonCancelRequest.setVisibility(View.INVISIBLE);
                 ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+
                 // need to notify the driver
             }
         });
@@ -84,6 +111,7 @@ public class RiderRequest extends AppCompatActivity {
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
                 startActivity(intent);
+                request.child("status").setValue("finished");
             }
         });
     }
