@@ -12,8 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.caller.example.R;
-import com.caller.example.utils.ToastUtils;
+import com.instantcab.example.R;
 
 
 public class EditDialog extends BaseDialog implements View.OnClickListener {
