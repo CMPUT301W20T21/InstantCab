@@ -31,14 +31,16 @@ import java.util.HashMap;
 
 public class SignUpAct extends AppCompatActivity {
 
-    EditText username;
-    EditText email;
-    EditText password;
-    EditText phone;
+    private EditText username;
+    private EditText email;
+    private EditText password;
+    private EditText phone;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    String TAG = "Email Password";
-    String type;
+    private Profile profile;
+    private String TAG = "Auth";
+    private String type;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +64,10 @@ public class SignUpAct extends AppCompatActivity {
                     flag.setVisibility(View.VISIBLE);
                 }
                 else {
+                    username = findViewById(R.id.signUser);
+                    email = findViewById(R.id.signEmail);
+                    password = findViewById(R.id.signPass);
+                    phone = findViewById(R.id.signPhone);
                     String user = username.getText().toString();
                     final String mailText = email.getText().toString();
                     String pass = password.getText().toString();
@@ -72,36 +78,24 @@ public class SignUpAct extends AppCompatActivity {
                     if(rider.isChecked()){
                         type = "Rider";
                     }
-                    final Profile profile = new Profile();
+                    profile = new Profile(mailText, user, pNum, type);
                     mAuth.createUserWithEmailAndPassword(mailText, pass)
-                            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
                                         // Sign in success, update UI with the signed-in user's information
                                         Log.d(TAG, "createUserWithEmail:success");
                                         FirebaseUser user = mAuth.getCurrentUser();
-                                        //Added profile collection
-                                        db.collection("Users").document(mailText).set(profile)
-                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                    @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        Log.d(TAG, "addProfileCollection: success");
-                                                    }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.d(TAG, "addProfileCollection: failure" + e);
-                                                    }
-                                                });
-                                        updateUI(user);
+
+                                        updateUI(user, mailText);
                                     } else {
                                         // If sign in fails, display a message to the user.
+                                        /** What is EmailPasswordActivity **/
                                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                        Toast.makeText(EmailPasswordActivity.this, "Authentication failed.",
+                                        Toast.makeText(SignUpAct.this, "Authentication failed.",
                                                 Toast.LENGTH_SHORT).show();
-                                        updateUI(null);
+                                        updateUI(null, mailText);
                                     }
                                 }
                             });
@@ -114,14 +108,28 @@ public class SignUpAct extends AppCompatActivity {
 
     }
     // In this case Another Activity is the rider request page
-    public void  updateUI(FirebaseUser account){
+    public void  updateUI(FirebaseUser account, String mailText){
         if(account != null){
+            //Added profile collection
+            db.collection("Users").document(mailText).set(profile)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "addProfileCollection: success");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "addProfileCollection: failure" + e);
+                        }
+                    });
             Toast.makeText(this,"U Signed In successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
                 startActivity(new Intent(SignUpAct.this,DriverRequest.class));
             }
             else{
-                startActivity(new Intent(SignUpAct.this,AnotherActivity.class));
+                //startActivity(new Intent(SignUpAct.this,AnotherActivity.class));
             }
         }else {
             Toast.makeText(this,"U Didnt signed in",Toast.LENGTH_LONG).show();
