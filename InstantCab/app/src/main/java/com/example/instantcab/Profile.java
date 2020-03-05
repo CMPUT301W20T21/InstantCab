@@ -9,10 +9,7 @@ public class Profile {
     public Profile() {}
 
     public Profile(String email, String username, String phone, String type){
-        this.email = email;
-        this.username = username;
-        this.phone = phone;
-        this.type = type;
+
     }
 
     public String getEmail(){

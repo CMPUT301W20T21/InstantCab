@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">InstantCab</string>
+    <string name="map_key" translatable="false">AIzaSyBe0JPjMGjouwzrVtfk-dPx1xGD9spcUJ4</string>
     <string name="title_activity_login">Sign in</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -9,15 +10,4 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="google_maps_key">AIzaSyB3pJ8XeAILHM2w5hLwh7LYxjhg7Th6r_E</string>
-    <string name="current_request">Current Request</string>
-    <string name="from">From</string>
-    <string name="cancel_request">cancel request</string>
-    <string name="confirm_request" />
-    <string name="make_a_payment">Make a Payment</string>
-    <string name="pay">Pay</string>
-    <string name="tip_your_driver">Tip your driver</string>
-    <string name="tip">TIP</string>
-    <string name="total">Total cost %.2f</string>
 </resources>
