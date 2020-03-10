@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firestore.v1.WriteResult;
 import com.google.maps.android.SphericalUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -34,7 +42,10 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -44,10 +55,13 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
     private TextView fare;
     private static double CAB_START_RATE = 3.75;
     private static double RATE_PER_KM = 1.65;
+    private Button sendRequestButton;
     View mapView;
 
     Double originLat;
     Double originLon;
+
+    private FirebaseFirestore db;
 
     String TAG = "PreviewRequestActivity";
 
@@ -58,6 +72,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
         destination_request = findViewById(R.id.destination_request);
         fare = findViewById(R.id.fare);
+        sendRequestButton = findViewById(R.id.send_request_button);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -87,6 +102,15 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
                 bundle.putDouble("Lat", originLat);
                 bundle.putDouble("Lon", originLon);
                 intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+
+        sendRequestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendRequest();
+                Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
                 startActivity(intent);
             }
         });
@@ -271,5 +295,36 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         }
 
         return poly;
+    }
+
+    private void sendRequest(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // User is signed in
+            String email = user.getEmail();
+
+            db = FirebaseFirestore.getInstance();
+
+//            DatabaseReference mDatabase;
+//// ...
+//            mDatabase = FirebaseDatabase.getInstance().getReference();
+//
+////            DocumentReference dbDoc = db.collection("Users").document(email);
+//
+//            mDatabase.child("users").child(email).child("email").setValue(email);
+
+            // Create a Map to store the data we want to set
+            Map<String, Object> docData = new HashMap<>();
+            docData.put("email", email);
+            docData.put("start_lat", originLat);
+            docData.put("start_lon", originLon);
+            docData.put("dest_lat", latLng.latitude);
+            docData.put("dest_lon", latLng.longitude);
+            // Add a new document (asynchronously) in collection "cities" with id "LA"
+            db.collection("Request").document(email).set(docData);
+
+        } else {
+            // No user is signed in
+        }
     }
 }
