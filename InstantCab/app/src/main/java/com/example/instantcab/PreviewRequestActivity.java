@@ -110,8 +110,8 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
             @Override
             public void onClick(View v) {
                 sendRequest();
-                Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
-                startActivity(intent);
+//                Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
+//                startActivity(intent);
             }
         });
     }
@@ -302,6 +302,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         if (user != null) {
             // User is signed in
             String email = user.getEmail();
+            Log.i("have user", email);
 
             db = FirebaseFirestore.getInstance();
 
@@ -314,17 +315,22 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //            mDatabase.child("users").child(email).child("email").setValue(email);
 
             // Create a Map to store the data we want to set
-            Map<String, Object> docData = new HashMap<>();
-            docData.put("email", email);
-            docData.put("start_lat", originLat);
-            docData.put("start_lon", originLon);
-            docData.put("dest_lat", latLng.latitude);
-            docData.put("dest_lon", latLng.longitude);
-            // Add a new document (asynchronously) in collection "cities" with id "LA"
-            db.collection("Request").document(email).set(docData);
+//            Map<String, Object> docData = new HashMap<>();
+//            docData.put("email", email);
+//            docData.put("start_lat", originLat);
+//            docData.put("start_lon", originLon);
+//            docData.put("dest_lat", latLng.latitude);
+//            docData.put("dest_lon", latLng.longitude);
+//            docData.put("fare", fare.getText());
+//            docData.put("status", "pending");
+//            // Add a new document (asynchronously) in collection "cities" with id "LA"
+//            db.collection("Request").document(email).set(docData);
 
+            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending");
+            db.collection("Request").document(email).set(request);
         } else {
             // No user is signed in
+            Log.i("does not have user", "fail");
         }
     }
 }

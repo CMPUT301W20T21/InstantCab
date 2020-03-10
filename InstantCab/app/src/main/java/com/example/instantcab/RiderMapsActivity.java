@@ -28,6 +28,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
 
@@ -55,6 +57,8 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     public Location mLastKnownLocation;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,23 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
                 startActivityForResult(intent, ENTER_ROUTE_REQUEST);
             }
         });
+
+
+        // sign in for testing
+//        mAuth = FirebaseAuth.getInstance();
+//        mAuth.signInWithEmailAndPassword("1111@email.com","12345678")
+//                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<AuthResult> task) {
+//                        if(task.isSuccessful()){
+//                            // Sign in success, update UI with the signed-in user's information
+//                            Log.d(TAG, "signInAnonymously:success");
+//                        }
+//                        else{
+//                            Log.i("signinFail", "failed");
+//                        }
+//                    }
+//                });
     }
 
 
