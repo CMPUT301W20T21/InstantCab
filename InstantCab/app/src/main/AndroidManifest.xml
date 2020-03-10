@@ -18,8 +18,8 @@
         android:theme="@style/AppTheme">
         <activity android:name=".DriverRequest" />
         <activity android:name=".RiderRequest" />
-        <activity android:name=".LoginViewActivity" />
-        <activity android:name=".SignupViewActivity" />
+        <activity android:name=".LogActivity" />
+        <activity android:name=".SignUpAct" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -53,6 +53,7 @@
         <activity
             android:name=".RiderMapsActivity"
             android:label="@string/title_activity_maps">
+        </activity>
 
         <activity android:name=".MainActivity">
             <intent-filter>

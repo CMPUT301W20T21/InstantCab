@@ -17,6 +17,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * This class provides an activity to show a request page to the
+ * rider and allow the rider to confirm or cancel the trip.
+ */
 public class RiderRequest extends AppCompatActivity {
     private Button ButtonCancelRequest;
     private Button ButtonConfirmRequest;
