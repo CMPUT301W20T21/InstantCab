@@ -2,6 +2,8 @@ package com.example.instantcab;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -64,6 +67,9 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
     private FirebaseFirestore db;
 
     String TAG = "PreviewRequestActivity";
+
+    public Geocoder geocoder;
+    private String originAddr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +92,10 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
         originLat = intent.getExtras().getDouble("currentLat");
         originLon = intent.getExtras().getDouble("currentLon");
+
+        geocoder = new Geocoder(PreviewRequestActivity.this, Locale.getDefault());
+
+        originAddr = getAddressFromLatLon(new LatLng(originLat, originLon));
 
         //Calculating the distance in kilometers
 
@@ -326,11 +336,58 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //            // Add a new document (asynchronously) in collection "cities" with id "LA"
 //            db.collection("Request").document(email).set(docData);
 
-            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending");
+            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending", originAddr);
             db.collection("Request").document(email).set(request);
+            Log.i("origin location", originAddr);
         } else {
             // No user is signed in
             Log.i("does not have user", "fail");
         }
+    }
+
+    private String getAddressFromLatLon(LatLng latLng) {
+        List<Address> addresses = null;
+        String errorMessage = "";
+        StringBuilder builder = new StringBuilder();
+        try {
+            addresses = geocoder.getFromLocation(
+                    latLng.latitude,
+                    latLng.longitude, 1);
+        } catch (IOException ioException) {
+            // Catch network or other I/O problems.
+            //errorMessage = getString(R.string.service_not_available);
+            Log.e(TAG, errorMessage, ioException);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            // Catch invalid latitude or longitude values.
+            //errorMessage = getString(R.string.invalid_lat_long_used);
+            Log.e(TAG, errorMessage + ". " +
+                    "Latitude = " + latLng.latitude +
+                    ", Longitude = " +
+                    latLng.longitude, illegalArgumentException);
+        }
+        if (addresses != null && addresses.size() > 0) {
+
+            Address address = addresses.get(0);
+
+
+//                        ArrayList<String> addressFragments = new ArrayList<String>();
+
+            // Fetch the address lines using getAddressLine,
+            // join them, and send them to the thread.
+//                        for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+//                            addressFragments.add(address.getAddressLine(i));
+//                        }
+            for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                builder.append(address.getAddressLine(i));
+            }
+            Log.i(TAG, "onClickMap: " + builder.toString());
+            Log.i("locality", address.getLocality());
+            Log.i("feature name", address.getFeatureName());
+            Log.i("admin area", address.getAdminArea());
+//            Log.i("premises", address.getPremises());
+            Log.i("subadmin area", address.getSubAdminArea());
+            Log.i("address line", address.getAddressLine(0));
+        }
+        return builder.toString();
     }
 }

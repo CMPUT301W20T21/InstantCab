@@ -8,11 +8,12 @@ public class Request {
     private Double destinationLongitude;
     private String fare;
     private String status;
+    private String startLocationName;
 
     public Request(){}
 
     public Request(String email, Double startLatitude, Double startLongitude, Double destinationLatitude, Double destinationLongitude,
-                    String fare, String status){
+                    String fare, String status, String startLocationName){
         this.email = email;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -20,6 +21,7 @@ public class Request {
         this.destinationLongitude = destinationLatitude;
         this.fare = fare;
         this. status = status;
+        this.startLocationName = startLocationName;
     }
 
     public String getEmail() {
@@ -48,5 +50,9 @@ public class Request {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getStartLocationName() {
+        return startLocationName;
     }
 }
