@@ -1,6 +1,7 @@
 package com.example.instantcab;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +33,8 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -45,6 +48,8 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
     Double originLat;
     Double originLon;
+
+    String TAG = "PreviewRequestActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,11 +97,24 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         mMap = googleMap;
         mMap.addMarker(new MarkerOptions().position(latLng).title(destination_name));
         mMap.addCircle(new CircleOptions().center(RiderMapsActivity.DEFAULT_LOCATION).radius(20));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RiderMapsActivity.DEFAULT_LOCATION, 15));
-        Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .add(RiderMapsActivity.DEFAULT_LOCATION, latLng));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RiderMapsActivity.DEFAULT_LOCATION, 15));
+//        Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
+//                .clickable(true)
+//                .add(RiderMapsActivity.DEFAULT_LOCATION, latLng));
+////        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(originLat, originLon), 13));
+
+        /*
+        draw route between origin and destination
+         */
+        List<LatLng> polylineList = drawRoute(new LatLng(originLat, originLon), latLng);
+        Polyline line = mMap.addPolyline(new PolylineOptions()
+                .addAll(polylineList)
+                .width(12)
+                .color(Color.parseColor("#05b1fb"))//Google maps blue color
+                .geodesic(true)
+        );
     }
 
     public String calculateRate(double distance) {
@@ -148,8 +166,6 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //                        distanceDouble[0] = Double.parseDouble("0." + parsedDistance[0].replace("m", ""));
 //                    }
 
-                    Log.i("distance", Double.toString(distanceDouble[0]));
-
                 } catch (ProtocolException e) {
                     e.printStackTrace();
                 } catch (MalformedURLException e) {
@@ -172,5 +188,88 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
         Log.i("PreviewRequestFlag", "here"+parsedDistance[0]);
         return distanceDouble[0]/1000;
+    }
+
+    /*
+    Return list of polylines of routes
+     */
+    public List<LatLng> drawRoute(final LatLng origin, final LatLng dest){
+        final String[] response = new String[1];
+        final String[] encodedString = new String[1];
+
+        Thread thread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(getRouteUrl(origin, dest));
+                    Log.i("PreviewRequestDrawRoute", getRouteUrl(origin, dest));
+                    final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    InputStream in = new BufferedInputStream(conn.getInputStream());
+                    response[0] = IOUtils.toString(in, "UTF-8");
+
+                    JSONObject jsonObject = new JSONObject(response[0]);
+                    JSONArray array = jsonObject.getJSONArray("routes");
+                    JSONObject routes = array.getJSONObject(0);
+                    JSONObject overviewPolylines = routes.getJSONObject("overview_polyline");
+                    encodedString[0] = overviewPolylines.getString("points");
+
+                } catch (ProtocolException e) {
+                    e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+
+        try {
+            thread.join();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return decodePolyline(encodedString[0]);
+    }
+
+    private List<LatLng> decodePolyline(String encoded) {
+        //https://stackoverflow.com/questions/14702621/draw-path-between-two-points-using-google-maps-android-api-v2
+
+        List<LatLng> poly = new ArrayList<LatLng>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng( (((double) lat / 1E5)),
+                    (((double) lng / 1E5) ));
+            poly.add(p);
+        }
+
+        return poly;
     }
 }
