@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //jump to sign up activity
-                Intent intent = new Intent(MainActivity.this, SignUpAct.class);
+                Intent intent = new Intent(MainActivity.this, SignupViewActivity.class);
                 startActivity(intent);
             }
         });
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // jump to login activity
-                Intent intent = new Intent(MainActivity.this, LogActivity.class);
+                Intent intent = new Intent(MainActivity.this, LoginViewActivity.class);
                 startActivity(intent);
             }
         });

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "493024388649",
+    "firebase_url": "https://instantcab-35ce0.firebaseio.com",
+    "project_id": "instantcab-35ce0",
+    "storage_bucket": "instantcab-35ce0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493024388649:android:152e66959c9cc88b711e38",
+        "android_client_info": {
+          "package_name": "com.example.instantcab"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493024388649-5oo9nqadlil107726ks69o6vg3p3ivqe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrB9f8yHl2M_lpRCvXrwIs3u1tG7CT9Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493024388649-5oo9nqadlil107726ks69o6vg3p3ivqe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
