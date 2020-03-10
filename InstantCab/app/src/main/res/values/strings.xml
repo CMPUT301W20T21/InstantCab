@@ -20,4 +20,13 @@
     <string name="tip_your_driver">Tip your driver</string>
     <string name="tip">TIP</string>
     <string name="total">Total cost %.2f</string>
+    <string name="confirm">Confirm</string>
+    <string name="how_was_your_experience_n_with_the_driver">How was your experience\n with the Driver?</string>
+    <string name="bad">Bad</string>
+    <string name="good">Good</string>
+    <string name="email_address">email_address</string>
+    <string name="phone">phone</string>
+    <string name="rating">rating</string>
+    <string name="cancel">cancel</string>
+    <string name="ok">ok</string>
 </resources>

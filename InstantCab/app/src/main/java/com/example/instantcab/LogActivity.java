@@ -1,3 +1,17 @@
+/**Copyright 2020 CMPUT301W20T21
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.*/
+
 package com.example.instantcab;
 
 import android.content.Intent;
@@ -47,6 +61,10 @@ public class LogActivity extends AppCompatActivity {
                 final String mailText = email.getText().toString();
                 String pass = password.getText().toString();
 
+                /**
+                 * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
+                 * from the "Sign in a user with an email address and password" section part 3
+                 */
                 mAuth.signInWithEmailAndPassword(mailText,pass)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
@@ -59,7 +77,6 @@ public class LogActivity extends AppCompatActivity {
                                 }
                                 else{
                                     // If sign in fails, display a message to the user.
-                                    /** What does the make text go to??**/
                                     Log.w(TAG, "signInAnonymously:failure", task.getException());
                                     Toast.makeText(LogActivity.this, "Authentication failed.",
                                             Toast.LENGTH_SHORT).show();
@@ -71,8 +88,15 @@ public class LogActivity extends AppCompatActivity {
         });
     }
 
-    // In this case Another Activity is the rider request page
-    /** need Help getting the type object out of profile **/
+
+    /**
+     * updateUI was created with the assistance of stackoverflow question
+     * https://stackoverflow.com/questions/55697262/cannot-resolve-method-updateui
+     * Question By Gabriele Puia
+     * https://stackoverflow.com/users/10469999/gabriele-puia
+     * Answered By Tamir Abutbul
+     * https://stackoverflow.com/users/8274756/tamir-abutbul
+     */
     public void  updateUI(FirebaseUser account, String email){
         db = FirebaseFirestore.getInstance();
         DocumentReference dbDoc = db.collection("Users").document(email);
@@ -80,6 +104,7 @@ public class LogActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Profile profile = documentSnapshot.toObject(Profile.class);
+                assert profile != null;
                 type = profile.getType();
             }
         });
@@ -87,10 +112,10 @@ public class LogActivity extends AppCompatActivity {
         if(account != null){
             Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
-                startActivity(new Intent(LogActivity.this,DriverRequest.class));
+                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
             else{
-                //startActivity(new Intent(LogActivity.this,AnotherActivity.class));
+                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
             }
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
