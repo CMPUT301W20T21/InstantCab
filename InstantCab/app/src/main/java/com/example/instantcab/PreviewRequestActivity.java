@@ -70,6 +70,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
     public Geocoder geocoder;
     private String originAddr;
+    private String destAddr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
         originLat = intent.getExtras().getDouble("currentLat");
         originLon = intent.getExtras().getDouble("currentLon");
+        destAddr = intent.getExtras().getString("Address");
 
         geocoder = new Geocoder(PreviewRequestActivity.this, Locale.getDefault());
 
@@ -336,7 +338,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //            // Add a new document (asynchronously) in collection "cities" with id "LA"
 //            db.collection("Request").document(email).set(docData);
 
-            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending", originAddr);
+            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending", originAddr, destAddr);
             db.collection("Request").document(email).set(request);
             Log.i("origin location", originAddr);
         } else {
