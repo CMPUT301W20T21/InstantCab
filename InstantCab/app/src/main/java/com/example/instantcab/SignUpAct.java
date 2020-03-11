@@ -177,7 +177,7 @@ public class SignUpAct extends AppCompatActivity {
                                 Log.d(TAG, "addRatingCollection: failure");
                             }
                         });
-                startActivity(new Intent(SignUpAct.this,DriverLocationActivity.class));
+//                startActivity(new Intent(SignUpAct.this,DriverLocationActivity.class));
             }
             else{
                 startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));            }
