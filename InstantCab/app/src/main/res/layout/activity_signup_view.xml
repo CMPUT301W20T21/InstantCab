@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".MainActivity">
+    android:background="@drawable/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -23,6 +22,9 @@
             android:ems="10"
             android:hint="Username"
             android:inputType="textPersonName"
+            android:shadowColor="@color/quantum_googblue900"
+            android:textColor="@color/quantum_googblue900"
+            android:textColorHint="@color/quantum_googblue900"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/signEmail" />
 
@@ -31,7 +33,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:background="#0000CC"
             android:text="SignUp"
+            android:textColor="@color/places_text_white_alpha_87"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,6 +50,8 @@
             android:ems="10"
             android:hint="Password"
             android:inputType="textPersonName"
+            android:textColor="@color/quantum_googblue900"
+            android:textColorHint="@color/quantum_googblue900"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/signUser" />
 
@@ -56,8 +62,10 @@
             android:layout_marginStart="48dp"
             android:layout_marginTop="96dp"
             android:ems="10"
-            android:hint="email address"
+            android:hint="Email Address"
             android:inputType="textPersonName"
+            android:textColor="@color/quantum_googblue900"
+            android:textColorHint="@color/quantum_googblue900"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -68,8 +76,10 @@
             android:layout_marginStart="48dp"
             android:layout_marginTop="32dp"
             android:ems="10"
-            android:inputType="textPersonName"
             android:hint="Phone Number"
+            android:inputType="textPersonName"
+            android:textColor="@color/quantum_googblue900"
+            android:textColorHint="@color/quantum_googblue900"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/signPass" />
 
@@ -88,13 +98,15 @@
                 android:id="@+id/driverBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Driver" />
+                android:text="Driver"
+                android:textColor="@color/quantum_vanillagreenA700" />
 
             <RadioButton
                 android:id="@+id/riderBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Rider" />
+                android:text="Rider"
+                android:textColor="@color/quantum_vanillagreenA700" />
         </RadioGroup>
 
         <TextView
