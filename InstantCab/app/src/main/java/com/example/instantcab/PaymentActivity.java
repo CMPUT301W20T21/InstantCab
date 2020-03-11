@@ -9,7 +9,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+/**
+ * This class is an activity used for the rider to tip the driver and also calculate
+ * the total amount of money the rider needs to pay. Then it leads to
+ * another payment activity which generates QR code.
+ */
 public class PaymentActivity extends AppCompatActivity {
     private Button ButtonPay;
     private Button ButtonTip;

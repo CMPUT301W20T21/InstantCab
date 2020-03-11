@@ -180,8 +180,7 @@ public class SignUpAct extends AppCompatActivity {
                 startActivity(new Intent(SignUpAct.this,DriverLocationActivity.class));
             }
             else{
-                startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));
-            }
+                startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));            }
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
         }
