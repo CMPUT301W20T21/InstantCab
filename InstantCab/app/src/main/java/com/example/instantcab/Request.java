@@ -21,7 +21,7 @@ public class Request {
         this.destinationLatitude = destinationLatitude;
         this.destinationLongitude = destinationLatitude;
         this.fare = fare;
-        this. status = status;
+        this.status = status;
         this.startLocationName = startLocationName;
         this.destinationName = destinationName;
     }
