@@ -25,6 +25,8 @@ public class EnterRouteActivity extends AppCompatActivity {
     public final static int SEARCH_RESULT_CODE = 22;
     View start_location;
     String TAG = "EnterRouteActivity";
+    Double currentLat;
+    Double currentLon;
 
     // Set the fields to specify which types of place data to
     // return after the user has made a selection.
@@ -36,8 +38,10 @@ public class EnterRouteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_enter_route);
 
         // Get the Intent that started this activity and extract the string
-        //Intent intent = getIntent();
+        Intent intent = getIntent();
         //String message = intent.getStringExtra(RiderMapsActivity.START_LOCATION);
+        currentLat = intent.getExtras().getDouble("Lat");
+        currentLon = intent.getExtras().getDouble("Lon");
 
         start_location = findViewById(R.id.start_location);
 
@@ -71,13 +75,13 @@ public class EnterRouteActivity extends AppCompatActivity {
                 LatLng res = place.getLatLng();
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
-                String add = autocompleteFragment.getString(0);
-
                 Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putDouble("Lat", res.latitude);
                 bundle.putDouble("Lon", res.longitude);
                 bundle.putString("Address", place.getName());
+                bundle.putDouble("currentLat", currentLat);
+                bundle.putDouble("currentLon", currentLon);
                 intent.putExtras(bundle);
 //                setResult(RiderMapsActivity.ROUTE_RESULT_CODE, intent);
 //                finish();

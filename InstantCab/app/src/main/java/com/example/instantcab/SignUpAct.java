@@ -1,3 +1,17 @@
+/**Copyright 2020 CMPUT301W20T21
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.*/
+
 package com.example.instantcab;
 
 import android.content.Intent;
@@ -28,6 +42,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Collection;
 import java.util.HashMap;
+
+/**
+ * In future updates the SignUp activity will be accompanied by a necessary Check and Flag function
+ * This function will check for a min 6 digit password, a proper email with @ sign,
+ * and a properly formatted phone number.
+ */
 
 public class SignUpAct extends AppCompatActivity {
 
@@ -79,6 +99,10 @@ public class SignUpAct extends AppCompatActivity {
                         type = "Rider";
                     }
                     profile = new Profile(mailText, user, pNum, type);
+                    /**
+                     * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
+                     * from the "Create a Password based account" section part 4
+                     */
                     mAuth.createUserWithEmailAndPassword(mailText, pass)
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
@@ -91,7 +115,6 @@ public class SignUpAct extends AppCompatActivity {
                                         updateUI(user, mailText);
                                     } else {
                                         // If sign in fails, display a message to the user.
-                                        /** What is EmailPasswordActivity **/
                                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
                                         Toast.makeText(SignUpAct.this, "Authentication failed.",
                                                 Toast.LENGTH_SHORT).show();
@@ -107,10 +130,23 @@ public class SignUpAct extends AppCompatActivity {
 
 
     }
-    // In this case Another Activity is the rider request page
+
+    // DriverRequest is not the correct Activity but will serve as a place holder for now
+    /**
+     * updateUI was created with the assistance of stackoverflow question
+     * https://stackoverflow.com/questions/55697262/cannot-resolve-method-updateui
+     * Question By Gabriele Puia
+     * https://stackoverflow.com/users/10469999/gabriele-puia
+     * Answered By Tamir Abutbul
+     * https://stackoverflow.com/users/8274756/tamir-abutbul
+     */
     public void  updateUI(FirebaseUser account, String mailText){
         if(account != null){
             //Added profile collection
+            /**
+             * Database collections were created with the assistance of the firebase tutorial
+             * https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
+             */
             db.collection("Users").document(mailText).set(profile)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -124,15 +160,29 @@ public class SignUpAct extends AppCompatActivity {
                             Log.d(TAG, "addProfileCollection: failure" + e);
                         }
                     });
-            Toast.makeText(this,"U Signed In successfully",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
-                startActivity(new Intent(SignUpAct.this,DriverRequest.class));
+                //Sets a new database for the initial rating for new drivers
+                Rating rating = new Rating(0,0);
+                db.collection("Rating").document(mailText).set(rating)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "addRatingCollection: success");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "addRatingCollection: failure");
+                            }
+                        });
+                startActivity(new Intent(SignUpAct.this,DriverLocationActivity.class));
             }
             else{
-                startActivity(new Intent(SignUpAct.this, RiderRequest.class));
-            }
+                startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));            }
         }else {
-            Toast.makeText(this,"U Didnt signed in",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
         }
     }
 }
