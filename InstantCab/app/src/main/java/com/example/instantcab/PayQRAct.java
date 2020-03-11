@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
  * This Activity is reserved for the eventual addition of QR Bucks payment
  * Alongside the option for the rider to rate the driver with a thumbs up or down
  * This will be the final page that each request sees before they are removed from the database
+ * @author kbojakli
  */
 public class PayQRAct extends AppCompatActivity {
 
