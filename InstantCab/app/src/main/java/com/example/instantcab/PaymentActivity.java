@@ -53,9 +53,9 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Click to pay
-                //Intent intent = new Intent(PaymentActivity.this, anotherPaymentActivity.class);
-                //intent.putExtra("FARE", total);
-                //startActivity(intent);
+                Intent intent = new Intent(PaymentActivity.this, PayQRAct.class);
+                intent.putExtra("FARE", total);
+                startActivity(intent);
             }
         });
     }
