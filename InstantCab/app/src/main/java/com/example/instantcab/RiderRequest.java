@@ -34,6 +34,14 @@ public class RiderRequest extends AppCompatActivity {
     private String fare;
     private FirebaseAuth mAuth;
     private FirebaseDatabase db;
+    private String email;
+    private Double startLatitude;
+    private Double startLongitude;
+    private Double destinationLatitude;
+    private Double destinationLongitude;
+    private String status;
+    private String startLocationName;
+    private String destinationName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +49,15 @@ public class RiderRequest extends AppCompatActivity {
         setContentView(R.layout.activity_rider_request);
         // expect to send in the driver's name and also the fare
         fare = getIntent().getStringExtra("FARE");
-        driverName = getIntent().getStringExtra("DRIVER_NAME");
+        email = getIntent().getStringExtra("EMAIL");
+        startLatitude = getIntent().getDoubleExtra("SLA", 0);
+        startLongitude = getIntent().getDoubleExtra("SLO", 0);
+        destinationLatitude = getIntent().getDoubleExtra("DLA", 0);
+        destinationLongitude = getIntent().getDoubleExtra("DLO", 0);
+        status = "pending";
+        startLocationName = getIntent().getStringExtra("SLN");
+        destinationName = getIntent().getStringExtra("DLN");
+        //driverName = getIntent().getStringExtra("DRIVER_NAME");
 
         ButtonCancelRequest = findViewById(R.id.cancel_request);
         ButtonConfirmRequest = findViewById(R.id.confirm_request);
@@ -57,17 +73,19 @@ public class RiderRequest extends AppCompatActivity {
         db = FirebaseDatabase.getInstance();
         final FirebaseUser user = mAuth.getCurrentUser();
         final DatabaseReference request = db.getReference("server/saving-data/requests");
+        final Request req = new Request(email, startLatitude, startLongitude, destinationLatitude, destinationLongitude, fare, status, startLocationName, destinationName);
 
         Date currentTime = Calendar.getInstance().getTime();
         request.child("rider").setValue(user.getDisplayName());
         request.child("time").setValue(currentTime.toString());
-        request.child("status").setValue("pending");
+        request.child("status").setValue(req.getStatus());
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
-                request.child("status").setValue("cancelled");
+                req.setStatus("cancelled");
+                request.child("status").setValue(req.getStatus());
                 // need to notify the driver
 
                 // move back to the map activity
@@ -79,7 +97,8 @@ public class RiderRequest extends AppCompatActivity {
             driverStatus.setText("Driver picked up request");
             showDriver.setText(driverName);
             ButtonConfirmRequest.setVisibility(View.VISIBLE);
-            request.child("status").setValue("accepted");
+            req.setStatus("accepted");
+            request.child("status").setValue(req.getStatus());
             request.child("driver").setValue(driverName);
 
             // need the app to fire a notification
@@ -93,7 +112,7 @@ public class RiderRequest extends AppCompatActivity {
                 ButtonCancelRequest.setVisibility(View.INVISIBLE);
                 ButtonConfirmRequest.setVisibility(View.INVISIBLE);
 
-                // need to notify the driver
+                // does need to notify the driver
             }
         });
 
@@ -112,10 +131,11 @@ public class RiderRequest extends AppCompatActivity {
             public void onClick(View v) {
                 // Clicked when the driver arrives the destination
                 // go to the payment intent
+                req.setStatus("finished");
+                request.child("status").setValue(req.getStatus());
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
                 startActivity(intent);
-                request.child("status").setValue("finished");
             }
         });
     }
