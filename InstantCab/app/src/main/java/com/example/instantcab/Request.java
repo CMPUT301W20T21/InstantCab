@@ -19,7 +19,7 @@ public class Request {
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
         this.destinationLatitude = destinationLatitude;
-        this.destinationLongitude = destinationLatitude;
+        this.destinationLongitude = destinationLongitude;
         this.fare = fare;
         this. status = status;
         this.startLocationName = startLocationName;
