@@ -3,16 +3,21 @@ package com.example.instantcab;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,6 +26,10 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
 
@@ -44,6 +53,12 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     public Geocoder geocoder;
 
     public static final LatLng DEFAULT_LOCATION = new LatLng(53.524620, -113.515890);
+    public static final int DEFAULT_ZOOM = 15;
+
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    public Location mLastKnownLocation;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +73,38 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
+        // Construct a FusedLocationProviderClient.
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
         makeRequest = findViewById(R.id.request);
         makeRequest.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(RiderMapsActivity.this, EnterRouteActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putDouble("Lat", mLastKnownLocation.getLatitude());
+                bundle.putDouble("Lon", mLastKnownLocation.getLongitude());
+                intent.putExtras(bundle);
                 startActivityForResult(intent, ENTER_ROUTE_REQUEST);
             }
         });
+
+
+        // sign in for testing
+//        mAuth = FirebaseAuth.getInstance();
+//        mAuth.signInWithEmailAndPassword("1111@email.com","12345678")
+//                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<AuthResult> task) {
+//                        if(task.isSuccessful()){
+//                            // Sign in success, update UI with the signed-in user's information
+//                            Log.d(TAG, "signInAnonymously:success");
+//                        }
+//                        else{
+//                            Log.i("signinFail", "failed");
+//                        }
+//                    }
+//                });
     }
 
 
@@ -87,6 +126,13 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
 //        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
+
         mMap.addCircle(new CircleOptions().center(DEFAULT_LOCATION).radius(20));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15));
         mMap.setOnMyLocationButtonClickListener(this);
@@ -120,17 +166,13 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
     @Override
     public void onMapClick(LatLng latLng) {
-        if (mapMarker == null) {
-            mapMarker = mMap.addMarker(new MarkerOptions().position(latLng));
-        }
-        else {
-            mapMarker.setPosition(latLng);
-        }
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-    }
-
-    private void getDeviceLocation() {
-
+//        if (mapMarker == null) {
+//            mapMarker = mMap.addMarker(new MarkerOptions().position(latLng));
+//        }
+//        else {
+//            mapMarker.setPosition(latLng);
+//        }
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
     @Override
@@ -141,20 +183,6 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         getDeviceLocation();
         return false;
     }
-
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -205,6 +233,90 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             }
 //            makeRequest.setText(data.getExtras().getString("Address").split(",")[0]);
 //            makeRequest.setText(Integer.toString(resultCode));
+        }
+    }
+
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+        updateLocationUI();
+    }
+
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                mLastKnownLocation = null;
+                getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (mLocationPermissionGranted) {
+                Task locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = (Location) task.getResult();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(mLastKnownLocation.getLatitude(),
+                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch(SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
         }
     }
 }
