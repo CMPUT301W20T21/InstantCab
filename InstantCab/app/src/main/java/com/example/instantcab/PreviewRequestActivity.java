@@ -52,17 +52,18 @@ import java.util.Map;
 
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
-    private TextView destinationRequest;
-    private LatLng destinationLatLng;
-    private TextView fare;
-    private static double CAB_START_RATE = 3.75;
-    private static double RATE_PER_KM = 1.65;
-    private Button sendRequestButton;
-
     private View mapView;
 
-    private Double originLat;
-    private Double originLon;
+    private TextView destinationRequest;
+    private TextView fare;
+
+    private static double CAB_START_RATE = 3.75;
+    private static double RATE_PER_KM = 1.65;
+
+    private Button sendRequestButton;
+
+    private Double currentLat;
+    private Double currentLon;
 
     private FirebaseFirestore db;
 
@@ -72,6 +73,10 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
     private String originAddr;
     private String destAddr;
+    private String startAddr;
+
+    private LatLng destinationLatLng;
+    private LatLng startLatLng;
 
     private int DEFAULT_ZOOM = 13;
 
@@ -90,19 +95,23 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        destinationRequest.setText(intent.getExtras().getString("Address"));
-        destinationLatLng = new LatLng(intent.getExtras().getDouble("Lat"), intent.getExtras().getDouble("Lon"));
+        destinationRequest.setText(intent.getExtras().getString("destAddress"));
 
-        originLat = intent.getExtras().getDouble("currentLat");
-        originLon = intent.getExtras().getDouble("currentLon");
-        destAddr = intent.getExtras().getString("Address");
+        destinationLatLng = new LatLng(intent.getExtras().getDouble("destLat"), intent.getExtras().getDouble("destLon"));
+        startLatLng = new LatLng(intent.getExtras().getDouble("startLat"), intent.getExtras().getDouble("startLon"));
+
+        currentLat = intent.getExtras().getDouble("currentLat");
+        currentLon = intent.getExtras().getDouble("currentLon");
+
+        startAddr = intent.getExtras().getString("startAddress");
+        destAddr = intent.getExtras().getString("destAddress");
 
         geocoder = new Geocoder(PreviewRequestActivity.this, Locale.getDefault());
 
-        originAddr = getAddressFromLatLon(new LatLng(originLat, originLon));
+        originAddr = getAddressFromLatLon(new LatLng(currentLat, currentLon));
 
         //Calculating the distance in kilometers
-        Double distance = getDistance(new LatLng(originLat, originLon), destinationLatLng);
+        Double distance = getDistance(startLatLng, destinationLatLng);
 
         fare.setText(String.format("$%s", calculateRate(distance)));
 
@@ -111,8 +120,8 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
             public void onClick(View v) {
                 Intent intent = new Intent(PreviewRequestActivity.this, EnterRouteActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putDouble("Lat", originLat);
-                bundle.putDouble("Lon", originLon);
+                bundle.putDouble("Lat", currentLat);
+                bundle.putDouble("Lon", currentLon);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }
@@ -135,14 +144,14 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         mMap.addMarker(new MarkerOptions().position(destinationLatLng).title(destAddr));
         mMap.addMarker(new MarkerOptions().position(destinationLatLng).title(destAddr));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(originLat, originLon), DEFAULT_ZOOM));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, DEFAULT_ZOOM));
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         /*
         draw route between origin and destination
          */
-        drawRoute(new LatLng(originLat, originLon), destinationLatLng);
+        drawRoute(startLatLng, destinationLatLng);
     }
 
     /**
@@ -283,7 +292,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
      * @param dest
      */
     private void drawRoute(LatLng origin, LatLng dest){
-        List<LatLng> polylineList = generateRoute(new LatLng(originLat, originLon), destinationLatLng);
+        List<LatLng> polylineList = generateRoute(startLatLng, destinationLatLng);
 
         Polyline line = mMap.addPolyline(new PolylineOptions()
                 .addAll(polylineList)
@@ -365,7 +374,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //            // Add a new document (asynchronously) in collection "cities" with id "LA"
 //            db.collection("Request").document(email).set(docData);
 
-            Request request = new Request(email, originLat, originLon, destinationLatLng.latitude, destinationLatLng.longitude, fare.getText().toString(), "pending", originAddr, destAddr);
+            Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
             db.collection("Request").document(email).set(request);
             Log.i("origin location", originAddr);
         } else {
