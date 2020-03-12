@@ -1,3 +1,4 @@
+
 /**Copyright 2020 CMPUT301W20T21
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,19 @@
  limitations under the License.*/
 
 
+
 package com.example.instantcab;
 
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 /**
  * This is the test class for the Rating object
  * @author kbojakli
  */
+
 public class RatingTest {
 
     private Rating mockRating(){
