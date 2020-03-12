@@ -181,6 +181,7 @@ public class SignUpAct extends AppCompatActivity {
             }
             else{
                 startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));            }
+
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
         }

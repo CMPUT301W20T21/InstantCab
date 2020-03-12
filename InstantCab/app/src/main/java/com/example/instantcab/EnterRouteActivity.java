@@ -144,6 +144,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                 LatLng res = place.getLatLng();
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
+
 //                Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
 //                Bundle bundle = new Bundle();
 //                bundle.putDouble("Lat", res.latitude);
@@ -165,6 +166,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(destinationLatLng));
                 autocompleteFragment.setText(place.getName());
                 destinationAddr = place.getName();
+
             }
 
             @Override
