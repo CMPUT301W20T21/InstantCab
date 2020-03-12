@@ -110,9 +110,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
 
         startLatLng = new LatLng(currentLat, currentLon);
         startAddr = getAddressFromLatLon(startLatLng);
-
         startLocationBox = findViewById(R.id.start_location);
-
         // initiate place api
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
@@ -165,6 +163,8 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(destinationLatLng));
                 autocompleteFragment.setText(place.getName());
                 destinationAddr = place.getName();
+
+              
             }
 
             @Override
@@ -281,6 +281,11 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
             mMap.getUiSettings().setZoomControlsEnabled(true);
             startMarker = mMap.addMarker(new MarkerOptions().position(startLatLng).title("Start"));
         }
+        else {
+            tmpMarker.setPosition(latLng);
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    }
 
         /*
         https://stackoverflow.com/questions/36785542/how-to-change-the-position-of-my-location-button-in-google-maps-using-android-st/49038586
