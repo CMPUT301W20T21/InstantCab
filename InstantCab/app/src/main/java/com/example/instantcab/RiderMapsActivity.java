@@ -40,7 +40,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     private Marker mapMarker;
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0x0011;
-    View mapView;
+    private View mapView;
 
     public static final String START_LOCATION = "com.example.testmap.START_LOCATION";
     private TextView makeRequest;
