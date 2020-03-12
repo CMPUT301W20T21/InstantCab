@@ -36,6 +36,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * This activity logs in the user based on email and password and then takes them to the Driver/Rider
+ * home page depending on their user type
+ * In the future the password will be auto hidden while typing
+ * @author kbojakli
+ */
 public class LogActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;

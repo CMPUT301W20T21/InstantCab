@@ -15,6 +15,11 @@
 package com.example.instantcab;
 
 /**
+ * This Profile object is used to create the user profile to set in the firebase database
+ * @author kbojakli
+ */
+
+/**
  * Database collections were created with the assistance of the firebase tutorial
  * https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
  */

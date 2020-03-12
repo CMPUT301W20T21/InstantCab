@@ -31,9 +31,6 @@
         <activity android:name=".Rating" />
         <activity android:name=".RiderRequest" />
 
-        <activity android:name=".LogActivity" />
-        <activity android:name=".SignUpAct" />
-
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -74,6 +71,21 @@
         <activity android:name=".MainActivity">
 
         </activity>
+        <activity android:name=".SignUpAct"
+            android:label="@string/app_name"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.instantcab.MainActivity" />
+        </activity>
+        <activity android:name=".LogActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.instantcab.MainActivity" />
+        </activity>
+        <activity android:name=".PayQRAct" />
     </application>
 
 </manifest>
