@@ -59,20 +59,6 @@ public class RiderRequest extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String email = user.getEmail();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_rider_request);
-        // expect to send in the driver's name and also the fare
-        fare = getIntent().getStringExtra("FARE");
-
-        ButtonCancelRequest = findViewById(R.id.cancel_request);
-        ButtonConfirmRequest = findViewById(R.id.confirm_request);
-        ButtonPickedUp = findViewById(R.id.picked_up);
-        ButtonArrive = findViewById(R.id.arrive);
-        driverStatus = findViewById(R.id.driver_status);
-        showDriver = findViewById(R.id.driver_name);
-        // show the fare
-        showFare = findViewById(R.id.fare);
-        showFare.setText("$"+fare);
-
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         final Request[] req = {new Request()};
@@ -84,13 +70,26 @@ public class RiderRequest extends AppCompatActivity {
                 req[0] = documentSnapshot.toObject(Request.class);
             }
         });
+        setContentView(R.layout.activity_rider_request);
+        // expect to send in the driver's name and also the fare
+        fare = req[0].getFare();
+
+        ButtonCancelRequest = findViewById(R.id.cancel_request);
+        ButtonConfirmRequest = findViewById(R.id.confirm_request);
+        ButtonPickedUp = findViewById(R.id.picked_up);
+        ButtonArrive = findViewById(R.id.arrive);
+        driverStatus = findViewById(R.id.driver_status);
+        showDriver = findViewById(R.id.driver_name);
+        // show the fare
+        showFare = findViewById(R.id.fare);
+        showFare.setText(fare);
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
                 req[0].setStatus("cancelled");
-                db.collection("Request").document(email).set(request);
+                db.collection("Request").document(email).set(req[0]);
                 // need to notify the driver
 
                 // move back to the map activity
@@ -103,7 +102,7 @@ public class RiderRequest extends AppCompatActivity {
             showDriver.setText(driverName);
             ButtonConfirmRequest.setVisibility(View.VISIBLE);
             req[0].setStatus("accepted");
-            db.collection("Request").document(email).set(request);
+            db.collection("Request").document(email).set(req[0]);
 
             // need the app to fire a notification
         }
@@ -136,7 +135,7 @@ public class RiderRequest extends AppCompatActivity {
                 // Clicked when the driver arrives the destination
                 // go to the payment intent
                 req[0].setStatus("finished");
-                db.collection("Request").document(email).set(request);
+                db.collection("Request").document(email).set(req[0]);
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
                 startActivity(intent);
