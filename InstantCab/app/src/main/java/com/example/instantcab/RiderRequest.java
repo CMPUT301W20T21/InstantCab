@@ -1,3 +1,17 @@
+/**Copyright 2020 CMPUT301W20T21
+ *
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.*/
+
 package com.example.instantcab;
 
 import android.content.Intent;
@@ -8,11 +22,16 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -33,31 +52,27 @@ public class RiderRequest extends AppCompatActivity {
     private String driverName;
     private String fare;
     private FirebaseAuth mAuth;
-    private FirebaseDatabase db;
-    private String email;
-    private Double startLatitude;
-    private Double startLongitude;
-    private Double destinationLatitude;
-    private Double destinationLongitude;
-    private String status;
-    private String startLocationName;
-    private String destinationName;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final String email = user.getEmail();
         super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        final Request[] req = {new Request()};
+        CollectionReference requests = db.collection("Request");
+        final DocumentReference request = requests.document(email);
+        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                req[0] = documentSnapshot.toObject(Request.class);
+            }
+        });
         setContentView(R.layout.activity_rider_request);
         // expect to send in the driver's name and also the fare
-        fare = getIntent().getStringExtra("FARE");
-        email = getIntent().getStringExtra("EMAIL");
-        startLatitude = getIntent().getDoubleExtra("SLA", 0);
-        startLongitude = getIntent().getDoubleExtra("SLO", 0);
-        destinationLatitude = getIntent().getDoubleExtra("DLA", 0);
-        destinationLongitude = getIntent().getDoubleExtra("DLO", 0);
-        status = "pending";
-        startLocationName = getIntent().getStringExtra("SLN");
-        destinationName = getIntent().getStringExtra("DLN");
-        //driverName = getIntent().getStringExtra("DRIVER_NAME");
+        fare = req[0].getFare();
 
         ButtonCancelRequest = findViewById(R.id.cancel_request);
         ButtonConfirmRequest = findViewById(R.id.confirm_request);
@@ -67,25 +82,14 @@ public class RiderRequest extends AppCompatActivity {
         showDriver = findViewById(R.id.driver_name);
         // show the fare
         showFare = findViewById(R.id.fare);
-        showFare.setText("$"+fare);
-
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseDatabase.getInstance();
-        final FirebaseUser user = mAuth.getCurrentUser();
-        final DatabaseReference request = db.getReference("server/saving-data/requests");
-        final Request req = new Request(email, startLatitude, startLongitude, destinationLatitude, destinationLongitude, fare, status, startLocationName, destinationName);
-
-        Date currentTime = Calendar.getInstance().getTime();
-        request.child("rider").setValue(user.getDisplayName());
-        request.child("time").setValue(currentTime.toString());
-        request.child("status").setValue(req.getStatus());
+        showFare.setText(fare);
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
-                req.setStatus("cancelled");
-                request.child("status").setValue(req.getStatus());
+                req[0].setStatus("cancelled");
+                db.collection("Request").document(email).set(req[0]);
                 // need to notify the driver
 
                 // move back to the map activity
@@ -97,9 +101,8 @@ public class RiderRequest extends AppCompatActivity {
             driverStatus.setText("Driver picked up request");
             showDriver.setText(driverName);
             ButtonConfirmRequest.setVisibility(View.VISIBLE);
-            req.setStatus("accepted");
-            request.child("status").setValue(req.getStatus());
-            request.child("driver").setValue(driverName);
+            req[0].setStatus("accepted");
+            db.collection("Request").document(email).set(req[0]);
 
             // need the app to fire a notification
         }
@@ -131,8 +134,8 @@ public class RiderRequest extends AppCompatActivity {
             public void onClick(View v) {
                 // Clicked when the driver arrives the destination
                 // go to the payment intent
-                req.setStatus("finished");
-                request.child("status").setValue(req.getStatus());
+                req[0].setStatus("finished");
+                db.collection("Request").document(email).set(req[0]);
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
                 startActivity(intent);

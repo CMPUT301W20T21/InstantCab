@@ -11,6 +11,7 @@ public class Request {
     private String startLocationName;
     private String destinationName;
 
+
     public Request(){}
 
     public Request(String email, Double startLatitude, Double startLongitude, Double destinationLatitude, Double destinationLongitude,
@@ -19,11 +20,13 @@ public class Request {
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
         this.destinationLatitude = destinationLatitude;
-        this.destinationLongitude = destinationLatitude;
+        this.destinationLongitude = destinationLongitude;
         this.fare = fare;
+
         this.status = status;
         this.startLocationName = startLocationName;
         this.destinationName = destinationName;
+
     }
 
     public String getEmail() {
@@ -66,3 +69,4 @@ public class Request {
         this.status = status;
     }
 }
+

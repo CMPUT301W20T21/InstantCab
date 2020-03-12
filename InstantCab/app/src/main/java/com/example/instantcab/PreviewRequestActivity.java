@@ -52,32 +52,40 @@ import java.util.Map;
 
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
-    private TextView destination_request;
-    private LatLng latLng;
-    private String destination_name;
+    private View mapView;
+
+    private TextView destinationRequest;
     private TextView fare;
+
     private static double CAB_START_RATE = 3.75;
     private static double RATE_PER_KM = 1.65;
-    private Button sendRequestButton;
-    View mapView;
 
-    Double originLat;
-    Double originLon;
+    private Button sendRequestButton;
+
+    private Double currentLat;
+    private Double currentLon;
 
     private FirebaseFirestore db;
 
     String TAG = "PreviewRequestActivity";
 
-    public Geocoder geocoder;
+    private Geocoder geocoder;
+
     private String originAddr;
     private String destAddr;
+    private String startAddr;
+
+    private LatLng destinationLatLng;
+    private LatLng startLatLng;
+
+    private int DEFAULT_ZOOM = 13;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preview_request_activity);
 
-        destination_request = findViewById(R.id.destination_request);
+        destinationRequest = findViewById(R.id.destination_request);
         fare = findViewById(R.id.fare);
         sendRequestButton = findViewById(R.id.send_request_button);
 
@@ -87,32 +95,33 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        destination_request.setText(intent.getExtras().getString("Address"));
-        latLng = new LatLng(intent.getExtras().getDouble("Lat"), intent.getExtras().getDouble("Lon"));
-        destination_name = intent.getExtras().getString("Address");
+        destinationRequest.setText(intent.getExtras().getString("destAddress"));
 
-        originLat = intent.getExtras().getDouble("currentLat");
-        originLon = intent.getExtras().getDouble("currentLon");
-        destAddr = intent.getExtras().getString("Address");
+        destinationLatLng = new LatLng(intent.getExtras().getDouble("destLat"), intent.getExtras().getDouble("destLon"));
+        startLatLng = new LatLng(intent.getExtras().getDouble("startLat"), intent.getExtras().getDouble("startLon"));
+
+        currentLat = intent.getExtras().getDouble("currentLat");
+        currentLon = intent.getExtras().getDouble("currentLon");
+
+        startAddr = intent.getExtras().getString("startAddress");
+        destAddr = intent.getExtras().getString("destAddress");
 
         geocoder = new Geocoder(PreviewRequestActivity.this, Locale.getDefault());
 
-        originAddr = getAddressFromLatLon(new LatLng(originLat, originLon));
+        originAddr = getAddressFromLatLon(new LatLng(currentLat, currentLon));
 
         //Calculating the distance in kilometers
-
-//        Double distance = SphericalUtil.computeDistanceBetween(RiderMapsActivity.DEFAULT_LOCATION, latLng);
-        Double distance = getDistance(new LatLng(originLat, originLon), latLng);
+        Double distance = getDistance(startLatLng, destinationLatLng);
 
         fare.setText(String.format("$%s", calculateRate(distance)));
 
-        destination_request.setOnClickListener(new View.OnClickListener() {
+        destinationRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PreviewRequestActivity.this, EnterRouteActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putDouble("Lat", originLat);
-                bundle.putDouble("Lon", originLon);
+                bundle.putDouble("Lat", currentLat);
+                bundle.putDouble("Lon", currentLon);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }
@@ -131,40 +140,49 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.addMarker(new MarkerOptions().position(latLng).title(destination_name));
-        mMap.addCircle(new CircleOptions().center(RiderMapsActivity.DEFAULT_LOCATION).radius(20));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RiderMapsActivity.DEFAULT_LOCATION, 15));
-//        Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
-//                .clickable(true)
-//                .add(RiderMapsActivity.DEFAULT_LOCATION, latLng));
-////        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(originLat, originLon), 13));
+        mMap.addMarker(new MarkerOptions().position(destinationLatLng).title(destAddr));
+        mMap.addMarker(new MarkerOptions().position(destinationLatLng).title(destAddr));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, DEFAULT_ZOOM));
+
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
         /*
         draw route between origin and destination
          */
-        List<LatLng> polylineList = drawRoute(new LatLng(originLat, originLon), latLng);
-        Polyline line = mMap.addPolyline(new PolylineOptions()
-                .addAll(polylineList)
-                .width(12)
-                .color(Color.parseColor("#05b1fb"))//Google maps blue color
-                .geodesic(true)
-        );
+        drawRoute(startLatLng, destinationLatLng);
     }
 
+    /**
+     * calculate fare based on distance
+     * @param distance
+     * @return fare
+     */
     public String calculateRate(double distance) {
         DecimalFormat df2 = new DecimalFormat("#.##");
         String estimate_fare = df2.format(CAB_START_RATE + RATE_PER_KM*distance);
         return estimate_fare;
     }
 
+    /**
+     * get request URL to get route information
+     * @param origin
+     * @param dest
+     * @return a URL string
+     */
     private String getRouteUrl(LatLng origin, LatLng dest) {
         return "https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.latitude + "," +
                 origin.longitude + "&destination=" + dest.latitude + "," + dest.longitude +
                 "&sensor=false&units=metric&mode=driving" + "&key=" + getString(R.string.google_maps_key);
     }
 
+    /**
+     * get driving distance from starting location to destination
+     * @param origin
+     * @param dest
+     * @return driving distance in km
+     */
     public Double getDistance(final LatLng origin, final LatLng dest){
 
         // https://stackoverflow.com/questions/18310126/get-the-distance-between-two-locations-in-android
@@ -193,15 +211,6 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
                     parsedDistance[0] =distance.getString("value");
                     distanceDouble[0] = Double.parseDouble(parsedDistance[0]);
 
-                    // https://stackoverflow.com/questions/56176753/how-implements-the-google-distance-matrix-api-at-android-studio
-//                    if (parsedDistance[0].contains("km")){
-//                        distanceDouble[0] = Double.parseDouble(parsedDistance[0].replace("km", ""));
-//
-//                    }
-//                    else {
-//                        distanceDouble[0] = Double.parseDouble("0." + parsedDistance[0].replace("m", ""));
-//                    }
-
                 } catch (ProtocolException e) {
                     e.printStackTrace();
                 } catch (MalformedURLException e) {
@@ -226,10 +235,13 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         return distanceDouble[0]/1000;
     }
 
-    /*
-    Return list of polylines of routes
+    /**
+     * generate a list of polylines consisting the route
+     * @param origin
+     * @param dest
+     * @return a list of polylines of route
      */
-    public List<LatLng> drawRoute(final LatLng origin, final LatLng dest){
+    public List<LatLng> generateRoute(final LatLng origin, final LatLng dest){
         final String[] response = new String[1];
         final String[] encodedString = new String[1];
 
@@ -274,6 +286,27 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         return decodePolyline(encodedString[0]);
     }
 
+    /**
+     * draws a route froom starting location and destination on map
+     * @param origin
+     * @param dest
+     */
+    private void drawRoute(LatLng origin, LatLng dest){
+        List<LatLng> polylineList = generateRoute(startLatLng, destinationLatLng);
+
+        Polyline line = mMap.addPolyline(new PolylineOptions()
+                .addAll(polylineList)
+                .width(12)
+                .color(Color.parseColor("#05b1fb"))//Google maps blue color
+                .geodesic(true)
+        );
+    }
+
+    /**
+     * decode google coded polyline
+     * @param encoded
+     * @return a list of Latitude and Longitude consisting the route
+     */
     private List<LatLng> decodePolyline(String encoded) {
         //https://stackoverflow.com/questions/14702621/draw-path-between-two-points-using-google-maps-android-api-v2
 
@@ -309,6 +342,9 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         return poly;
     }
 
+    /**
+     * add request to firebase
+     */
     private void sendRequest(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -338,7 +374,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 //            // Add a new document (asynchronously) in collection "cities" with id "LA"
 //            db.collection("Request").document(email).set(docData);
 
-            Request request = new Request(email, originLat, originLon, latLng.latitude, latLng.longitude, fare.getText().toString(), "pending", originAddr, destAddr);
+            Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
             db.collection("Request").document(email).set(request);
             Log.i("origin location", originAddr);
         } else {
@@ -347,6 +383,11 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
+    /**
+     * find the address name by latLng
+     * @param latLng
+     * @return address street name
+     */
     private String getAddressFromLatLon(LatLng latLng) {
         List<Address> addresses = null;
         String errorMessage = "";
@@ -371,14 +412,6 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
             Address address = addresses.get(0);
 
-
-//                        ArrayList<String> addressFragments = new ArrayList<String>();
-
-            // Fetch the address lines using getAddressLine,
-            // join them, and send them to the thread.
-//                        for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-//                            addressFragments.add(address.getAddressLine(i));
-//                        }
             for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 builder.append(address.getAddressLine(i));
             }
@@ -390,6 +423,6 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
             Log.i("subadmin area", address.getSubAdminArea());
             Log.i("address line", address.getAddressLine(0));
         }
-        return builder.toString();
+        return builder.toString().split(",")[0];
     }
 }
