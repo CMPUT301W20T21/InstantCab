@@ -47,6 +47,8 @@ import java.util.HashMap;
  * In future updates the SignUp activity will be accompanied by a necessary Check and Flag function
  * This function will check for a min 6 digit password, a proper email with @ sign,
  * and a properly formatted phone number.
+ * At the moment the class signs up a user for driver or rider and creates a custom profile
+ * @author kbojakli
  */
 
 public class SignUpAct extends AppCompatActivity {
