@@ -66,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /*
+    get location permission
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
