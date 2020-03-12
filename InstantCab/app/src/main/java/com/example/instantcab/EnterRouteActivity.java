@@ -71,10 +71,11 @@ public class EnterRouteActivity extends AppCompatActivity {
                 LatLng res = place.getLatLng();
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
-                String add = autocompleteFragment.getString(0);
+//                String add = autocompleteFragment.getString(0);
 
                 Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
                 Bundle bundle = new Bundle();
+                Log.i("hereeeeeeee", Double.toString(res.latitude));
                 bundle.putDouble("Lat", res.latitude);
                 bundle.putDouble("Lon", res.longitude);
                 bundle.putString("Address", place.getName());
