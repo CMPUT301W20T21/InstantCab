@@ -67,6 +67,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         getLocationPermission();
 
         geocoder = new Geocoder(RiderMapsActivity.this, Locale.getDefault());
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -121,20 +122,13 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(53.524620, -113.515890);
-
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-        mMap.addCircle(new CircleOptions().center(DEFAULT_LOCATION).radius(20));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15));
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapClickListener(this);
         //mMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -143,6 +137,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         else {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
         }
 
         /*
@@ -160,7 +155,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             // position on right bottom
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            layoutParams.setMargins(0, 0, 30, 30);
+            layoutParams.setMargins(0, 0, 150, 40);
         }
     }
 
@@ -201,38 +196,14 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 //        }
         if (requestCode == ENTER_ROUTE_REQUEST) {
             if (resultCode == ROUTE_RESULT_CODE) {
-//                Log.i("return", "Lat: " + data.getExtras().getDouble("Lat") + ", " + "Lon: " + data.getExtras().getDouble("Lon")
-//                        + ", " + "Address: " + data.getExtras().getString("Address"));
+                Log.i("return", "Lat: " + data.getExtras().getDouble("Lat") + ", " + "Lon: " + data.getExtras().getDouble("Lon")
+                        + ", " + "Address: " + data.getExtras().getString("Address"));
 //                Toast.makeText(this, data.getExtras().getString("Address"), Toast.LENGTH_SHORT).show();
                 double lat = data.getExtras().getDouble("Lat");
                 double lon = data.getExtras().getDouble("Lon");
                 makeRequest.setText(data.getExtras().getString("Address"));
                 mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(data.getExtras().getString("Address")));
-//                List<Address> addresses = null;
-//                StringBuilder builder = new StringBuilder();
-//                try {
-//                    addresses = geocoder.getFromLocation(
-//                            lat,
-//                            lon, 1);
-//                } catch (IOException ioException) {
-//                    // Catch network or other I/O problems.
-//                    //errorMessage = getString(R.string.service_not_available);
-//                } catch (IllegalArgumentException illegalArgumentException) {
-//                    // Catch invalid latitude or longitude values.
-//                    //errorMessage = getString(R.string.invalid_lat_long_used);
-//                }
-//                if (addresses != null && addresses.size() > 0) {
-//
-////                    Address address = addresses.get(0);
-////
-////                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-////                        builder.append(address.getAddressLine(i));
-////                    }
-//                    makeRequest.setText(addresses.get(0).getAddressLine(0));
-//                }
             }
-//            makeRequest.setText(data.getExtras().getString("Address").split(",")[0]);
-//            makeRequest.setText(Integer.toString(resultCode));
         }
     }
 

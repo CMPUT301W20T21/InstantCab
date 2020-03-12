@@ -45,6 +45,7 @@ public class EnterRouteActivity extends AppCompatActivity {
 
         start_location = findViewById(R.id.start_location);
 
+        // initiate place api
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
         start_location.setOnClickListener(new View.OnClickListener() {
@@ -83,8 +84,7 @@ public class EnterRouteActivity extends AppCompatActivity {
                 bundle.putDouble("currentLat", currentLat);
                 bundle.putDouble("currentLon", currentLon);
                 intent.putExtras(bundle);
-//                setResult(RiderMapsActivity.ROUTE_RESULT_CODE, intent);
-//                finish();
+
                 startActivity(intent);
             }
 
