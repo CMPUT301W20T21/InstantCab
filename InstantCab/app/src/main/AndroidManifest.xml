@@ -30,7 +30,11 @@
         <activity android:name=".Profile" />
         <activity android:name=".Rating" />
         <activity android:name=".RiderRequest" />
+
+        <activity android:name=".LogActivity" />
         <activity android:name=".SignUpAct" />
+
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -63,7 +67,10 @@
         </activity>
         <activity
             android:name=".RiderMapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+
+            android:label="@string/title_activity_maps">
+        </activity>
+
         <activity android:name=".MainActivity">
 
         </activity>
