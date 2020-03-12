@@ -1,8 +1,10 @@
 package com.example.instantcab;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Selection;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -14,8 +16,8 @@ import android.widget.EditText;
 public class EditDialog extends BaseDialog implements View.OnClickListener {
     private Context mContext;
     private EditText mEditText;
-    private Button btncancel;
-    private Button btnsave;
+    private Button btn_cancel;
+    private Button btn_save;
 
     public EditDialog(Context context) {
         super(context, R.style.EditDialog);
@@ -32,14 +34,14 @@ public class EditDialog extends BaseDialog implements View.OnClickListener {
     }
 
     private void listener() {
-        btncancel.setOnClickListener(this);
-        btnsave.setOnClickListener(this);
+        btn_cancel.setOnClickListener(this);
+        btn_save.setOnClickListener(this);
     }
 
     private void initView() {
         mEditText = findViewById(R.id.edit_file_name);
-        btncancel = findViewById(R.id.btn_cancel);
-        btnsave = findViewById(R.id.btn_ok);
+        btn_cancel = findViewById(R.id.btn_cancel);
+        btn_save = findViewById(R.id.btn_ok);
     }
 
 
@@ -52,23 +54,13 @@ public class EditDialog extends BaseDialog implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_cancel:
-                hintKeyBoard();
-                dismiss();
-                if (mOnCancelListener != null) {
-                    mOnCancelListener.cancel();
-                }
+                mOnCancelListener.cancel();
                 break;
             case R.id.btn_ok:
-                hintKeyBoard();
-                String name = mEditText.getText().toString();
-                name = name.trim();
-                if (mOKListener != null) {
-                    mOKListener.Ok();
-                    dismiss();
-                    }
-                }
+                mOKListener.Ok();
                 break;
         }
+
     }
 
     public void show(String fileName) {
@@ -81,14 +73,4 @@ public class EditDialog extends BaseDialog implements View.OnClickListener {
 
         Selection.selectAll(mEditText.getText());
     }
-
-    public void hintKeyBoard() {
-        InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if(imm.isActive()&&getCurrentFocus()!=null){
-            if (getCurrentFocus().getWindowToken()!=null) {
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        }
-    }
 }
-

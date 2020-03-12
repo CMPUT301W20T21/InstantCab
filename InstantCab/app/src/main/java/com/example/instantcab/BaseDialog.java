@@ -9,11 +9,6 @@ public class BaseDialog extends Dialog {
     public OnCancelClickListener mOnCancelListener;
     protected OKClickListener mOKListener;
 
-    public BaseDialog(Context context) {
-        super(context);
-        setTitleView();
-        setWindowBackground();
-    }
 
     public BaseDialog(Context context, int themeResId) {
         super(context, themeResId);
@@ -21,12 +16,6 @@ public class BaseDialog extends Dialog {
         setWindowBackground();
     }
 
-    protected BaseDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, cancelable, cancelListener);
-        setCancelMode();
-        setTitleView();
-        setWindowBackground();
-    }
 
     private void setCancelMode() {
         setCanceledOnTouchOutside(true);
