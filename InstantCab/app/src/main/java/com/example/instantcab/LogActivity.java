@@ -36,6 +36,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * This activity logs in the user based on email and password and then takes them to the Driver/Rider
+ * home page depending on their user type
+ * In the future the password will be auto hidden while typing
+ * @author kbojakli
+ */
 public class LogActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -112,10 +118,11 @@ public class LogActivity extends AppCompatActivity {
         if(account != null){
             Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
-//                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
+                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
             else{
-                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
+//                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
+                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
