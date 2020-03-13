@@ -51,6 +51,7 @@ import java.util.HashMap;
 
  * At the moment the class signs up a user for driver or rider and creates a custom profile
  * @author kbojakli
+
  */
 
 public class SignUpAct extends AppCompatActivity {
