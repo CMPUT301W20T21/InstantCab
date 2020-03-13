@@ -70,9 +70,9 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //jump to sign up activity
+                //jump to DriverAcceptRequest Activity
                 Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
-
+                //if a marker was clicked before, information about the marker would be carried to new Activity
                 if (markerRequest != null) {
                     Bundle bundle = new Bundle();
                     bundle.putString("from", markerRequest.getStartLocationName());
@@ -88,6 +88,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     }
 
     private Map<String, Object> retrieveData() {
+        // connect to firebase and load neighbouring markers
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
@@ -119,6 +120,9 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     }
 
     private void updateLocationUI() {
+        /*get driver's current location if permission is granted by user;
+        otherwise, no action.
+         */
         if (ActivityCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]
                     {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
@@ -141,6 +145,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     }
 
     private void createMarker (double dest_lat, double dest_lon, String email) {
+        //create a marker with a location and a title
         LatLng latLng = new LatLng(dest_lat, dest_lon);
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(email);
         mMap.addMarker(markerOptions);
@@ -148,7 +153,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        //initialization
+        //initialization google map
         mMap = googleMap;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -171,18 +176,22 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 // click marker should edit textView below.
                 String markerEmail = marker.getTitle();
-                DocumentReference docRef = db.collection("Request").document(markerEmail);
-                docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        markerRequest = documentSnapshot.toObject(Request.class);
-                        textDest = findViewById(R.id.destination);
-                        textDest.setText(markerRequest.getDestinationName());
-                        textFare = findViewById(R.id.fare);
-                        textFare.setText(markerRequest.getFare());
-                        Log.i(TAG, textDest.toString());
-                    }
-                });
+                // marker selected should not be driver's own location marker
+                if (!markerEmail.equals("Driver Location")){
+                    DocumentReference docRef = db.collection("Request").document(markerEmail);
+                    docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            markerRequest = documentSnapshot.toObject(Request.class);
+                            textDest = findViewById(R.id.destination);
+                            textDest.setText(markerRequest.getDestinationName());
+                            textFare = findViewById(R.id.fare);
+                            textFare.setText(markerRequest.getFare());
+                            Log.i(TAG, textDest.toString());
+                        }
+                    });
+                }
+
                 previousMarker = marker;
                 return true;
             }
