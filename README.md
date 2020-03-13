@@ -54,4 +54,9 @@ Answer https://stackoverflow.com/a/39179202/12826510
  Java Code Examples for GoogleMap.OnMarkerClickListener https://www.programcreek.com/java-api-examples/index.php?api=com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
  
 GoogleMap API for Android by xingchen https://www.cnblogs.com/zhujiabin/p/7570960.html
+
+### References under author `hgou`
+*Firebase documents https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
+
+*Android Developers documents for make dialog https://developer.android.com/guide/topics/ui/dialogs
  
