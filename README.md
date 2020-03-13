@@ -16,6 +16,8 @@ Copyright 2020 CMPUT301W20T21
  
  ### References under author `kbojakli`
  
+ ** Alert: The SignUpActTest does not delete the newly added users so you must change the email before use
+ 
  * Database collections were created with the assistance of the firebase tutorial:
 https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
 
