@@ -118,12 +118,11 @@ public class LogActivity extends AppCompatActivity {
         if(account != null){
             Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
-
-//                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
-
+                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
             else{
-                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
+//                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
+                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
