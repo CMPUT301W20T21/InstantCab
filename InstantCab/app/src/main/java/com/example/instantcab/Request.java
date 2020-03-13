@@ -10,6 +10,7 @@ public class Request {
     private String status;
     private String startLocationName;
     private String destinationName;
+    private String driver;
 
 
     public Request(){}
@@ -26,6 +27,7 @@ public class Request {
         this.status = status;
         this.startLocationName = startLocationName;
         this.destinationName = destinationName;
+        this.driver = null;
 
     }
 
@@ -65,8 +67,13 @@ public class Request {
         return destinationName;
     }
 
+    public String getDriver() { return driver; }
+
     public void setStatus(String status) {
         this.status = status;
+    }
+    public void setDriver(String name){
+        this.driver = name;
     }
 }
 
