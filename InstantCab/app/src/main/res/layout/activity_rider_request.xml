@@ -36,7 +36,8 @@
         android:padding="10dp"
         android:hint="Hub Mall"
         android:textSize="24sp"
-        android:textStyle="bold">
+        android:textStyle="bold"
+        android:singleLine="true">
 
     </TextView>
 
@@ -57,7 +58,8 @@
         android:padding="10dp"
         android:hint="Southgate Mall"
         android:textSize="24sp"
-        android:textStyle="bold">
+        android:textStyle="bold"
+        android:singleLine="true">
 
     </TextView>
 
