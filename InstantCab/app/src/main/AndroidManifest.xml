@@ -20,6 +20,8 @@
         <activity android:name=".RiderRequest" />
         <activity android:name=".LogActivity" />
         <activity android:name=".SignUpAct" />
+        <activity android:name=".DriverAcceptRequest"/>
+        <activity android:name=".DriverLocationActivity"/>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
