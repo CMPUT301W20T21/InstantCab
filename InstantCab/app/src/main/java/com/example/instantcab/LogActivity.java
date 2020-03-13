@@ -112,7 +112,7 @@ public class LogActivity extends AppCompatActivity {
                 Profile profile = documentSnapshot.toObject(Profile.class);
                 assert profile != null;
                 type = profile.getType();
-                
+
                 if(account != null){
                     Toast.makeText(LogActivity.this,"You signed in successfully",Toast.LENGTH_LONG).show();
                     if(type.equals("Driver")){

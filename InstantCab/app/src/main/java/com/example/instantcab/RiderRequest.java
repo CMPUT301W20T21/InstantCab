@@ -61,6 +61,19 @@ public class RiderRequest extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_rider_request);
+
+        ButtonCancelRequest = findViewById(R.id.cancel_request);
+        ButtonConfirmRequest = findViewById(R.id.confirm_request);
+        ButtonPickedUp = findViewById(R.id.picked_up);
+        ButtonArrive = findViewById(R.id.arrive);
+        driverStatus = findViewById(R.id.driver_status);
+        showDriver = findViewById(R.id.driver_name);
+        showFare = findViewById(R.id.fare);
+        starting = findViewById(R.id.start);
+        destination = findViewById(R.id.end);
+
         db = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String email;
@@ -74,27 +87,10 @@ public class RiderRequest extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 req[0] = documentSnapshot.toObject(Request.class);
+                updateUi(req);
             }
         });
-        setContentView(R.layout.activity_rider_request);
-        // expect to send in the driver's name and also the fare
-        fare = req[0].getFare();
-
-        ButtonCancelRequest = findViewById(R.id.cancel_request);
-        ButtonConfirmRequest = findViewById(R.id.confirm_request);
-        ButtonPickedUp = findViewById(R.id.picked_up);
-        ButtonArrive = findViewById(R.id.arrive);
-        driverStatus = findViewById(R.id.driver_status);
-        showDriver = findViewById(R.id.driver_name);
-        // show the fare
-        showFare = findViewById(R.id.fare);
-        showFare.setText(fare);
-        // show pick-up point and destination
-        starting = findViewById(R.id.start);
-        destination = findViewById(R.id.end);
-        destination.setText(req[0].getDestinationName());
-        starting.setText(req[0].getStartLocationName());
-
+        
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,5 +149,16 @@ public class RiderRequest extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void updateUi(Request []req){
+        // expect to send in the driver's name and also the fare
+        fare = req[0].getFare();
+        // show the fare
+        showFare.setText(fare);
+
+        // show pick-up point and destination
+        destination.setText(req[0].getDestinationName());
+        starting.setText(req[0].getStartLocationName());
     }
 }
