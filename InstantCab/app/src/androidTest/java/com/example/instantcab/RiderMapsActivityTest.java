@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class EnterRouteActivityTest {
+public class RiderMapsActivityTest {
     private Solo solo;
 
     @Rule
