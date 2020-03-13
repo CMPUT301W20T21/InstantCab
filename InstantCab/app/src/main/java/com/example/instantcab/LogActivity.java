@@ -103,7 +103,7 @@ public class LogActivity extends AppCompatActivity {
      * Answered By Tamir Abutbul
      * https://stackoverflow.com/users/8274756/tamir-abutbul
      */
-    public void  updateUI(FirebaseUser account, String email){
+    public void  updateUI(final FirebaseUser account, String email){
         db = FirebaseFirestore.getInstance();
         DocumentReference dbDoc = db.collection("Users").document(email);
         dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -112,19 +112,19 @@ public class LogActivity extends AppCompatActivity {
                 Profile profile = documentSnapshot.toObject(Profile.class);
                 assert profile != null;
                 type = profile.getType();
+
+                if(account != null){
+                    Toast.makeText(LogActivity.this,"You signed in successfully",Toast.LENGTH_LONG).show();
+                    if(type.equals("Driver")){
+                        startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
+                    }
+                    else{
+                        startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
+                    }
+                }else {
+                    Toast.makeText(LogActivity.this,"You did not sign in",Toast.LENGTH_LONG).show();
+                }
             }
         });
-
-        if(account != null){
-            Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
-            if(type.equals("Driver")){
-                startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
-            }
-            else{
-                startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
-            }
-        }else {
-            Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
-        }
     }
 }
