@@ -35,7 +35,7 @@ from the "Create a Password based account" section part 4
 from the "Sign in a user with an email address and password" section part 3
 
 
- ### References under author lshang
+ ### References under author `lshang`
 
 Stackoverflow post by Kostya Khuta https://stackoverflow.com/users/2101843/kostya-khuta
 Answer https://stackoverflow.com/a/43258912/12826510
@@ -45,3 +45,13 @@ Answer by https://stackoverflow.com/a/14702636/12826510
 
 Stackoverflow post by user5710756 https://stackoverflow.com/users/5710756/user5710756
 Answer https://stackoverflow.com/a/39179202/12826510
+
+
+ ### References under author `peiyuan1`
+ 
+ Firebase documents https://firebase.google.com/docs/database/android/read-and-write
+ 
+ Java Code Examples for GoogleMap.OnMarkerClickListener https://www.programcreek.com/java-api-examples/index.php?api=com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
+ 
+GoogleMap API for Android by xingchen https://www.cnblogs.com/zhujiabin/p/7570960.html
+ 
