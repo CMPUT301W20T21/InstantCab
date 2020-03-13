@@ -81,4 +81,20 @@ public class RequestTest {
 
         assertEquals("Accepted", request.getStatus());
     }
+
+    @Test
+    public void testGetDriver(){
+        Request request = mockRequest();
+
+        assertNull(request.getDriver());
+    }
+
+    @Test
+    public void testSetDriver(){
+        Request request = mockRequest();
+
+        request.setDriver("Jane Doe");
+
+        assertEquals("Jane Doe", request.getDriver());
+    }
 }

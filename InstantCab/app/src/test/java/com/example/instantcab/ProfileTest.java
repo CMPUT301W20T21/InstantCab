@@ -1,3 +1,4 @@
+
 /**Copyright 2020 CMPUT301W20T21
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.*/
 
+
 package com.example.instantcab;
 
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 /**
  * This is the test doc for the profile object
  * @author kbojakli
  */
+
 public class ProfileTest {
 
     private Profile mockProfile(){

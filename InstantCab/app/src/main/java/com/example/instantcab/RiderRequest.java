@@ -39,6 +39,8 @@ import java.util.Date;
 /**
  * This class provides an activity to show a request page to the
  * rider and allow the rider to confirm or cancel the trip.
+ *
+ *  @author lijiangn
  */
 public class RiderRequest extends AppCompatActivity {
     private Button ButtonCancelRequest;
@@ -48,6 +50,8 @@ public class RiderRequest extends AppCompatActivity {
     private TextView driverStatus;
     private TextView showDriver;
     private TextView showFare;
+    private TextView starting;
+    private TextView destination;
     private Boolean driverAccept;
     private String driverName;
     private String fare;
@@ -56,11 +60,13 @@ public class RiderRequest extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final String email = user.getEmail();
         super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final String email;
+        if (user != null) email = user.getEmail();
+        else {email = "test@email.com";}
+        mAuth = FirebaseAuth.getInstance();
         final Request[] req = {new Request()};
         CollectionReference requests = db.collection("Request");
         final DocumentReference request = requests.document(email);
@@ -83,6 +89,11 @@ public class RiderRequest extends AppCompatActivity {
         // show the fare
         showFare = findViewById(R.id.fare);
         showFare.setText(fare);
+        // show pick-up point and destination
+        starting = findViewById(R.id.start);
+        destination = findViewById(R.id.end);
+        destination.setText(req[0].getDestinationName());
+        starting.setText(req[0].getStartLocationName());
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,18 +105,19 @@ public class RiderRequest extends AppCompatActivity {
 
                 // move back to the map activity
                 Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                startActivity(intent);
             }
         });
 
-        if (driverAccept) {
-            driverStatus.setText("Driver picked up request");
-            showDriver.setText(driverName);
-            ButtonConfirmRequest.setVisibility(View.VISIBLE);
-            req[0].setStatus("accepted");
-            db.collection("Request").document(email).set(req[0]);
-
-            // need the app to fire a notification
-        }
+//        if (driverAccept) {
+//            driverStatus.setText("Driver picked up request");
+//            showDriver.setText(driverName);
+//            ButtonConfirmRequest.setVisibility(View.VISIBLE);
+//            req[0].setStatus("accepted");
+//            db.collection("Request").document(email).set(req[0]);
+//
+//            // TODO: need the app to fire a notification
+//        }
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +127,7 @@ public class RiderRequest extends AppCompatActivity {
                 ButtonCancelRequest.setVisibility(View.INVISIBLE);
                 ButtonConfirmRequest.setVisibility(View.INVISIBLE);
 
-                // does need to notify the driver
+                // TODO: does need to notify the driver
             }
         });
 

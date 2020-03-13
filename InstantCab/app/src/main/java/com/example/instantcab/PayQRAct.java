@@ -15,7 +15,10 @@
 package com.example.instantcab;
 
 
+
+
 import android.content.Intent;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +43,10 @@ import javax.annotation.Nullable;
  * This Activity is reserved for the eventual addition of QR Bucks payment
  * Alongside the option for the rider to rate the driver with a thumbs up or down
  * This will be the final page that each request sees before they are removed from the database
+
+
  * @author kbojakli
+
  */
 public class PayQRAct extends AppCompatActivity {
 
@@ -59,6 +65,7 @@ public class PayQRAct extends AppCompatActivity {
 
         if(user != null){
             email = user.getEmail();
+
             db = FirebaseFirestore.getInstance();
             DocumentReference dbDoc = db.collection("Rating").document(email);
             dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -71,6 +78,7 @@ public class PayQRAct extends AppCompatActivity {
                 }
             });
         }
+
 
         Button confirm = findViewById(R.id.paymentConfirm);
 
@@ -102,7 +110,10 @@ public class PayQRAct extends AppCompatActivity {
                                 Log.d(TAG, "RatingUpdated: Failure");
                             }
                         });
+
+
                 startActivity(new Intent(PayQRAct.this,RiderMapsActivity.class));
+
 
             }
         });
