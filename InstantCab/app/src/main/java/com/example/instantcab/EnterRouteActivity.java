@@ -413,6 +413,11 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
             Log.i("subadmin area", address.getSubAdminArea());
             Log.i("address line", address.getAddressLine(0));
         }
-        return builder.toString();
+
+        if(builder.toString() == ""){
+            return (Double.toString(latLng.latitude) + ", " + Double.toString(latLng.longitude));
+        }
+
+        return builder.toString().split(",")[0];
     }
 }
