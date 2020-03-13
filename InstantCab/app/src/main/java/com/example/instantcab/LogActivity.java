@@ -118,9 +118,11 @@ public class LogActivity extends AppCompatActivity {
         if(account != null){
             Toast.makeText(this,"You signed in successfully",Toast.LENGTH_LONG).show();
             if(type == "Driver"){
+                Log.i("type", type);
                 startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));
             }
             else{
+                Log.i("type", type);
                 startActivity(new Intent(LogActivity.this,RiderMapsActivity.class));
             }
         }else {
