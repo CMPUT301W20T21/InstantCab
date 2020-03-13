@@ -1,16 +1,16 @@
 /**Copyright 2020 CMPUT301W20T21
 
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.*/
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.*/
 
 package com.example.instantcab;
 
@@ -43,15 +43,16 @@ import javax.annotation.Nullable;
  * This Activity is reserved for the eventual addition of QR Bucks payment
  * Alongside the option for the rider to rate the driver with a thumbs up or down
  * This will be the final page that each request sees before they are removed from the database
-
-
+ *
+ * This class may not work as intended due to the limitations of the OnSuccessListener
+ * If not I will ask the TA on next Lab section
+ *
  * @author kbojakli
-
  */
 public class PayQRAct extends AppCompatActivity {
 
-    private int good;
-    private int bad;
+    private int good = 0;
+    private int bad = 0;
     private String TAG = "Updated";
     private FirebaseFirestore db;
     private String email;

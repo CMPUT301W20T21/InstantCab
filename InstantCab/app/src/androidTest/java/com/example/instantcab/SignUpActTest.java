@@ -15,11 +15,12 @@
 package com.example.instantcab;
 
 import android.app.Activity;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
-
 import com.robotium.solo.Solo;
 
 import org.junit.After;
@@ -30,6 +31,8 @@ import org.junit.Test;
 
 /**
  * Tests the SignUpAct activity to see if it switches to the correct Activity
+ * Unfortunately I could not figure out how to delete firebase users from code so you have to
+ * rename the email every time
  * @author kbojakli
  */
 public class SignUpActTest {
@@ -70,8 +73,11 @@ public class SignUpActTest {
         solo.enterText(((EditText) solo.getView(R.id.signUser)), "Rider");
         solo.enterText(((EditText) solo.getView(R.id.signPhone)), "999-999-9999");
 
-        solo.clickOnRadioButton(R.id.riderBox);
-        solo.clickOnButton("SIGNUP");
+        RadioButton rb = (RadioButton) solo.getView(R.id.riderBox);
+        solo.clickOnView(rb);
+
+        Button signUp = (Button) solo.getView(R.id.signButton);
+        solo.clickOnView(signUp);
 
         solo.assertCurrentActivity("Wrong Activity", RiderMapsActivity.class);
     }
@@ -88,8 +94,11 @@ public class SignUpActTest {
         solo.enterText(((EditText) solo.getView(R.id.signUser)), "Driver");
         solo.enterText(((EditText) solo.getView(R.id.signPhone)), "999-999-9999");
 
-        solo.clickOnRadioButton(R.id.driverBox);
-        solo.clickOnButton("SIGNUP");
+        RadioButton rb = (RadioButton) solo.getView(R.id.driverBox);
+        solo.clickOnView(rb);
+
+        Button signUp = (Button) solo.getView(R.id.signButton);
+        solo.clickOnView(signUp);
 
         solo.assertCurrentActivity("Wrong Activity", DriverLocationActivity.class);
     }

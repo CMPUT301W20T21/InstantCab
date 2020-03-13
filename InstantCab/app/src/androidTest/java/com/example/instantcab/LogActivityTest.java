@@ -15,6 +15,7 @@
 package com.example.instantcab;
 
 import android.app.Activity;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -66,7 +67,8 @@ public class LogActivityTest {
         solo.enterText(((EditText) solo.getView(R.id.logEmail)), "rider@test.com");
         solo.enterText(((EditText) solo.getView(R.id.logPass)), "123456");
 
-        solo.clickOnButton("LOGIN");
+        Button log = (Button) solo.getView(R.id.logButton);
+        solo.clickOnView(log);
 
         solo.assertCurrentActivity("Wrong Activity", RiderMapsActivity.class);
     }
@@ -81,7 +83,8 @@ public class LogActivityTest {
         solo.enterText(((EditText) solo.getView(R.id.logEmail)), "driver@test.com");
         solo.enterText(((EditText) solo.getView(R.id.logPass)), "123456");
 
-        solo.clickOnButton("LOGIN");
+        Button log = (Button) solo.getView(R.id.logButton);
+        solo.clickOnView(log);
 
         solo.assertCurrentActivity("Wrong Activity", DriverLocationActivity.class);
     }
