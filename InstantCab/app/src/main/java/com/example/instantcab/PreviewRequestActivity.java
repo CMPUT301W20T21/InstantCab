@@ -108,7 +108,7 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
         geocoder = new Geocoder(PreviewRequestActivity.this, Locale.getDefault());
 
-        originAddr = getAddressFromLatLon(new LatLng(currentLat, currentLon));
+//        originAddr = getAddressFromLatLon(new LatLng(currentLat, currentLon));
 
         //Calculating the distance in kilometers
         Double distance = getDistance(startLatLng, destinationLatLng);
@@ -376,7 +376,10 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
             Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
             db.collection("Request").document(email).set(request);
-            Log.i("origin location", originAddr);
+//            Log.i("origin location", originAddr);
+
+            Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
+            startActivity(intent);
         } else {
             // No user is signed in
             Log.i("does not have user", "fail");

@@ -61,7 +61,7 @@ public class RiderRequest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rider_request);
         // expect to send in the driver's name and also the fare
-        fare = getIntent().getStringExtra("FARE");
+//        fare = getIntent().getStringExtra("FARE");
 
         ButtonCancelRequest = findViewById(R.id.cancel_request);
         ButtonConfirmRequest = findViewById(R.id.confirm_request);
@@ -71,7 +71,7 @@ public class RiderRequest extends AppCompatActivity {
         showDriver = findViewById(R.id.driver_name);
         // show the fare
         showFare = findViewById(R.id.fare);
-        showFare.setText("$"+fare);
+        showFare.setText("$5.15");
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
