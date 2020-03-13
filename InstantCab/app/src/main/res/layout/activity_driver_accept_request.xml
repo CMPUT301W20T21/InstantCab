@@ -30,6 +30,7 @@
     </TextView>
 
     <TextView
+        android:id="@+id/from"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -50,6 +51,7 @@
     </TextView>
 
     <TextView
+        android:id="@+id/to"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"

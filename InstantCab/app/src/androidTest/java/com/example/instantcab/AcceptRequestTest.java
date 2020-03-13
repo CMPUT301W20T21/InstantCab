@@ -15,7 +15,8 @@
 package com.example.instantcab;
 
 import android.app.Activity;
-import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -27,16 +28,15 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Tests the change in Activity once the CONFIRM button is clicked in PayQRAct
- * @author kbojakli
+ * Checks the AcceptRequestTest to see if the TextView fields are modified with data
  */
-public class PayQRActTest {
+public class AcceptRequestTest {
 
     private Solo solo;
 
     @Rule
-    public ActivityTestRule<PayQRAct> rule =
-            new ActivityTestRule<>(PayQRAct.class,true,true);
+    public ActivityTestRule<LogActivity> rule =
+            new ActivityTestRule<>(LogActivity.class,true,true);
 
     /**
      * Runs before all tests and creates an instance
@@ -56,20 +56,18 @@ public class PayQRActTest {
         Activity activity = rule.getActivity();
     }
 
-    @Test
-    public void checkConfirm(){
-        solo.assertCurrentActivity("Wrong Activity", PayQRAct.class);
-
-        Button confirm = (Button) solo.getView(R.id.paymentConfirm);
-        solo.clickOnView(confirm);
-
-        solo.assertCurrentActivity("Wrong Activity", RiderMapsActivity.class);
-    }
-
     /**
-     * Would Have checked the change in Activity if the Radio Buttons were clicked but it is Unknown
-     * to me on How to check for the Current user during Testing
+     * Checks if the TextView changes to corresponding information of a marker
      */
+    @Test
+    public void checkTextViewChange(){
+
+        solo.enterText(((EditText) solo.getView(R.id.from)), "Hub Mall");
+        solo.enterText(((EditText) solo.getView(R.id.to)),"Southgate Mall");
+        solo.enterText(((EditText) solo.getView(R.id.username)), "John Doe");
+        solo.enterText(((EditText) solo.getView(R.id.fare)), "$15.00");
+
+    }
 
     /**
      * Closes Activity after each test
@@ -79,6 +77,4 @@ public class PayQRActTest {
     public void tearDown() throws Exception{
         solo.finishOpenedActivities();
     }
-
-
 }

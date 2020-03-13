@@ -33,6 +33,11 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
 
+/**
+ * This activity shows a map centred at rider's current location
+ * When user clicks on the make a request text box it brings user to EnterRouteActivity
+ * @author lshang
+ */
 public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapClickListener {
 
@@ -142,6 +147,8 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
         /*
         https://stackoverflow.com/questions/36785542/how-to-change-the-position-of-my-location-button-in-google-maps-using-android-st/49038586
+        Stackoverflow post by user5710756 https://stackoverflow.com/users/5710756/user5710756
+        Answer https://stackoverflow.com/a/39179202/12826510
          */
 
         // adjust myLocation button position
@@ -170,6 +177,10 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
+    /**
+     * get current location
+     * @return
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
@@ -207,6 +218,9 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         }
     }
 
+    /**
+     * get location permission from user
+     */
     private void getLocationPermission() {
         /*
          * Request location permission, so that we can get the location of the
@@ -241,6 +255,10 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         updateLocationUI();
     }
 
+    /**
+     * set map centre to current location
+     * enable my location button
+     */
     private void updateLocationUI() {
         if (mMap == null) {
             return;
@@ -260,6 +278,11 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         }
     }
 
+
+    /**
+     * move map centre to current location
+     * update mLastKnownLocation
+     */
     private void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare

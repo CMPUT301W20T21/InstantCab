@@ -10,12 +10,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class EnterRouteActivityTest {
+public class RiderMapsActivityTest {
     private Solo solo;
 
     @Rule
-    public ActivityTestRule<EnterRouteActivity> rule =
-            new ActivityTestRule<>(EnterRouteActivity.class, true, true);
+    public ActivityTestRule<RiderMapsActivity> rule =
+            new ActivityTestRule<>(RiderMapsActivity.class, true, true);
 
     /**
      * Runs before all tests and creates solo instance
@@ -25,23 +25,17 @@ public class EnterRouteActivityTest {
     public void setUp() throws Exception{
         solo = new Solo(InstrumentationRegistry.getInstrumentation(), rule.getActivity());
 
-        solo.assertCurrentActivity("Wrong Activity", EnterRouteActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", RiderMapsActivity.class);
 
-        /*
-        Cannot implement, this is how it should go
-        solo.clickOnMap();
-        solo.clickOnButton("DESTINATION");
-        solo.clickOnButton("NEXT");
-         */
+        solo.clickOnText("Make a request");
 
     }
 
-    /* not actually gonna test
     @Test
     public void checkSwitchActivity(){
-        solo.assertCurrentActivity("Wrong Activity", PreviewRequestActivity.class);
+
+        solo.assertCurrentActivity("Wrong Activity", EnterRouteActivity.class);
     }
-     */
 
     /**
      * Closes the activity after each test

@@ -49,12 +49,14 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     FusedLocationProviderClient fusedLocationProviderClient;
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
-    private Marker previousMarker;
+    private Marker previousMarker = null;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private Button btnAccept;
     private TextView textDest;
     private TextView textFare;
+    private String TAG = "Rider at this marker is: ";
+    public Request markerRequest = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +65,22 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         updateLocationUI();
+
         btnAccept = findViewById(R.id.accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //jump to sign up activity
                 Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
+
+                if (markerRequest != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("from", markerRequest.getStartLocationName());
+                    bundle.putString("to", markerRequest.getDestinationName());
+                    bundle.putString("email", markerRequest.getEmail());
+                    bundle.putString("fare", markerRequest.getFare());
+                    intent.putExtras(bundle);
+                }
                 startActivity(intent);
             }
         });
@@ -123,7 +135,6 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                     SupportMapFragment supportMapFragment = (SupportMapFragment)
                             getSupportFragmentManager().findFragmentById(R.id.google_map);
                     supportMapFragment.getMapAsync(DriverLocationActivity.this);
-
                 }
             }
         });
@@ -158,15 +169,21 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                     previousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
                 marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                previousMarker = marker;
                 // click marker should edit textView below.
-                String markerTitle = marker.getTitle();
-                DocumentReference docRef = db.collection("Request").document(markerTitle);
-
-                textDest = findViewById(R.id.destination);
-                textDest.setText(marker.getId());
-                textFare = findViewById(R.id.fare);
-                textFare.setText("?");
+                String markerEmail = marker.getTitle();
+                DocumentReference docRef = db.collection("Request").document(markerEmail);
+                docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        markerRequest = documentSnapshot.toObject(Request.class);
+                        textDest = findViewById(R.id.destination);
+                        textDest.setText(markerRequest.getDestinationName());
+                        textFare = findViewById(R.id.fare);
+                        textFare.setText(markerRequest.getFare());
+                        Log.i(TAG, textDest.toString());
+                    }
+                });
+                previousMarker = marker;
                 return true;
             }
         });
