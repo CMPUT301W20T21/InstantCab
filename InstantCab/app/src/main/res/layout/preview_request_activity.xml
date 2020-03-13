@@ -53,7 +53,7 @@
         android:paddingLeft="10dp"
         android:text="$15.00"
         android:textColor="#DF2C2727"
-        android:textSize="25sp" />
+        android:textSize="25dp" />
 
     <Button
         android:id="@+id/send_request_button"

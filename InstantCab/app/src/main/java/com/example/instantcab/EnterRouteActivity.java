@@ -307,8 +307,8 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         }
         try {
 //            if (mLocationPermissionGranted) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
 //            } else {
 //                mMap.setMyLocationEnabled(false);
 //                mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -327,24 +327,24 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
          */
         try {
 //            if (mLocationPermissionGranted) {
-                Task locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            mLastKnownLocation = (Location) task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
+            Task locationResult = mFusedLocationProviderClient.getLastLocation();
+            locationResult.addOnCompleteListener(this, new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful()) {
+                        // Set the map's camera position to the current location of the device.
+                        mLastKnownLocation = (Location) task.getResult();
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(mLastKnownLocation.getLatitude(),
+                                        mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    } else {
+                        Log.d(TAG, "Current location is null. Using defaults.");
+                        Log.e(TAG, "Exception: %s", task.getException());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+                        mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     }
-                });
+                }
+            });
 //            }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
@@ -413,6 +413,11 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
             Log.i("subadmin area", address.getSubAdminArea());
             Log.i("address line", address.getAddressLine(0));
         }
-        return builder.toString();
+
+        if(builder.toString() == ""){
+            return (Double.toString(latLng.latitude) + ", " + Double.toString(latLng.longitude));
+        }
+
+        return builder.toString().split(",")[0];
     }
 }
