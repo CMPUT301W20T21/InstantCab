@@ -94,18 +94,19 @@ public class RiderRequest extends AppCompatActivity {
 
                 // move back to the map activity
                 Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                startActivity(intent);
             }
         });
 
-        if (driverAccept) {
-            driverStatus.setText("Driver picked up request");
-            showDriver.setText(driverName);
-            ButtonConfirmRequest.setVisibility(View.VISIBLE);
-            req[0].setStatus("accepted");
-            db.collection("Request").document(email).set(req[0]);
-
-            // need the app to fire a notification
-        }
+//        if (driverAccept) {
+//            driverStatus.setText("Driver picked up request");
+//            showDriver.setText(driverName);
+//            ButtonConfirmRequest.setVisibility(View.VISIBLE);
+//            req[0].setStatus("accepted");
+//            db.collection("Request").document(email).set(req[0]);
+//
+//            // need the app to fire a notification
+//        }
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
