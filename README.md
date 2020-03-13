@@ -16,6 +16,8 @@ Copyright 2020 CMPUT301W20T21
  
  ### References under author `kbojakli`
  
+ ** Alert: The SignUpActTest does not delete the newly added users so you must change the email before use
+ 
  * Database collections were created with the assistance of the firebase tutorial:
 https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
 
@@ -31,8 +33,6 @@ from the "Create a Password based account" section part 4
 
   * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
 from the "Sign in a user with an email address and password" section part 3
-
-  -Data addition was created with the assistance of CMPUT 301 Lab 5: the Firebase Lab
 
 
  ### References under author lshang

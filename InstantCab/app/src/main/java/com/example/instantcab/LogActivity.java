@@ -111,6 +111,10 @@ public class LogActivity extends AppCompatActivity {
      * https://stackoverflow.com/users/8274756/tamir-abutbul
      */
     public void  updateUI(final FirebaseUser account, String email){
+        /**
+         * Database collections were created with the assistance of the firebase tutorial
+         * https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
+         */
         db = FirebaseFirestore.getInstance();
         DocumentReference dbDoc = db.collection("Users").document(email);
         dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {

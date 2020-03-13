@@ -15,6 +15,7 @@
 package com.example.instantcab;
 
 import android.app.Activity;
+import android.widget.Button;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -59,7 +60,8 @@ public class PayQRActTest {
     public void checkConfirm(){
         solo.assertCurrentActivity("Wrong Activity", PayQRAct.class);
 
-        solo.clickOnButton("CONFIRM");
+        Button confirm = (Button) solo.getView(R.id.paymentConfirm);
+        solo.clickOnView(confirm);
 
         solo.assertCurrentActivity("Wrong Activity", RiderMapsActivity.class);
     }
