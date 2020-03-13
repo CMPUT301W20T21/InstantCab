@@ -24,10 +24,8 @@ https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
 
  * updateUI was created with the assistance of Stack Overflow question
 https://stackoverflow.com/questions/55697262/cannot-resolve-method-updateui
-Question By [Gabriele Puia]
-(https://stackoverflow.com/users/10469999/gabriele-puia)
-Answered By [Tamir Abutbul]
-(https://stackoverflow.com/users/8274756/tamir-abutbul)
+Question By [Gabriele Puia](https://stackoverflow.com/users/10469999/gabriele-puia)
+Answered By [Tamir Abutbul](https://stackoverflow.com/users/8274756/tamir-abutbul)
 
   * This Authorization from the Sign Up activity was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
 from the "Create a Password based account" section part 4
