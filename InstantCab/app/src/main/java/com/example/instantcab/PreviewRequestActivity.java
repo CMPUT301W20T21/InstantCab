@@ -50,6 +50,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * This activity has a map that shows the driving route between start location and destination
+ * Shows estimated fare
+ * When user clicks the send request button, send the request in database and jump to open request page
+ * Also show the address of destination over the map, when rider clicks on it, jump to EnterRouteActivity to change the request
+ *
+ * @author lshang
+ */
 public class PreviewRequestActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private View mapView;
@@ -186,6 +194,10 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
     public Double getDistance(final LatLng origin, final LatLng dest){
 
         // https://stackoverflow.com/questions/18310126/get-the-distance-between-two-locations-in-android
+        /*
+        Stackoverflow post by Kostya Khuta https://stackoverflow.com/users/2101843/kostya-khuta
+        Answer https://stackoverflow.com/a/43258912/12826510
+         */
 
         final String[] parsedDistance = new String[1];
         final String[] response = new String[1];
@@ -242,6 +254,12 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
      * @return a list of polylines of route
      */
     public List<LatLng> generateRoute(final LatLng origin, final LatLng dest){
+        /*
+        Based on
+        Stackoverflow post by Kostya Khuta https://stackoverflow.com/users/2101843/kostya-khuta
+        Answer https://stackoverflow.com/a/43258912/12826510
+         */
+
         final String[] response = new String[1];
         final String[] encodedString = new String[1];
 
@@ -309,6 +327,10 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
      */
     private List<LatLng> decodePolyline(String encoded) {
         //https://stackoverflow.com/questions/14702621/draw-path-between-two-points-using-google-maps-android-api-v2
+        /*
+        Stackoverflow post by Zeeshan Mirza https://stackoverflow.com/users/1547539/zeeshan-mirza
+        Answer by https://stackoverflow.com/a/14702636/12826510
+         */
 
         List<LatLng> poly = new ArrayList<LatLng>();
         int index = 0, len = encoded.length();
@@ -426,6 +448,11 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
             Log.i("subadmin area", address.getSubAdminArea());
             Log.i("address line", address.getAddressLine(0));
         }
+
+        if(builder.toString() == ""){
+            return (Double.toString(latLng.latitude) + ", " + Double.toString(latLng.longitude));
+        }
+
         return builder.toString().split(",")[0];
     }
 }

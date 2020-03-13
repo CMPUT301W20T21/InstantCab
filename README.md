@@ -32,4 +32,16 @@ from the "Create a Password based account" section part 4
   * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
 from the "Sign in a user with an email address and password" section part 3
 
-  * Data addition was created with the assistance of `CMPUT 301 Lab 5: the Firebase Lab`
+  -Data addition was created with the assistance of CMPUT 301 Lab 5: the Firebase Lab
+
+
+ ### References under author lshang
+
+Stackoverflow post by Kostya Khuta https://stackoverflow.com/users/2101843/kostya-khuta
+Answer https://stackoverflow.com/a/43258912/12826510
+
+Stackoverflow post by Zeeshan Mirza https://stackoverflow.com/users/1547539/zeeshan-mirza
+Answer by https://stackoverflow.com/a/14702636/12826510
+
+Stackoverflow post by user5710756 https://stackoverflow.com/users/5710756/user5710756
+Answer https://stackoverflow.com/a/39179202/12826510

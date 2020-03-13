@@ -1,5 +1,24 @@
+/**Copyright 2020 CMPUT301W20T21
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.*/
+
 package com.example.instantcab;
 
+/**
+ * Request object to store information of a request and is used in firebase
+ *
+ * @author lshang
+ */
 public class Request {
     private String email;
     private Double startLatitude;
@@ -15,6 +34,18 @@ public class Request {
 
     public Request(){}
 
+    /**
+     *
+     * @param email
+     * @param startLatitude
+     * @param startLongitude
+     * @param destinationLatitude
+     * @param destinationLongitude
+     * @param fare
+     * @param status
+     * @param startLocationName
+     * @param destinationName
+     */
     public Request(String email, Double startLatitude, Double startLongitude, Double destinationLatitude, Double destinationLongitude,
                     String fare, String status, String startLocationName, String destinationName){
         this.email = email;
@@ -31,47 +62,96 @@ public class Request {
 
     }
 
+    /**
+     *
+     * @return request's rider email
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     *
+     * @return start location latitude
+     */
     public Double getStartLatitude() {
         return startLatitude;
     }
 
+    /**
+     *
+     * @return start location longitude
+     */
     public Double getStartLongitude() {
         return startLongitude;
     }
 
+    /**
+     *
+     * @return destination latitude
+     */
     public Double getDestinationLatitude() {
         return destinationLatitude;
     }
 
+    /**
+     *
+     * @return destination longitude
+     */
     public Double getDestinationLongitude() {
         return destinationLongitude;
     }
 
+    /**
+     *
+     * @return fare
+     */
     public String getFare() {
         return fare;
     }
 
+    /**
+     *
+     * @return request status
+     */
     public String getStatus() {
         return status;
     }
 
+    /**
+     *
+     * @return start location address
+     */
     public String getStartLocationName() {
         return startLocationName;
     }
 
+    /**
+     *
+     * @return destination address
+     */
     public String getDestinationName() {
         return destinationName;
     }
 
+    /**
+     *
+     * @return driver who accepted the request
+     */
     public String getDriver() { return driver; }
 
+    /**
+     * set request status
+     * @param status
+     */
     public void setStatus(String status) {
         this.status = status;
     }
+
+    /**
+     * set request driver
+     * @param name
+     */
     public void setDriver(String name){
         this.driver = name;
     }

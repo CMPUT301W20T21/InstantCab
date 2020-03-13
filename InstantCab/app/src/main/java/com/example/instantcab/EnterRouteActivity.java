@@ -40,6 +40,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * This activity allows riders to select start and end location by tapping on the map and click on start or destination button
+ * to set start or destination
+ * Default start location is current location
+ * Riders can also type and search destination
+ * TODO: allow user to type and search start location
+ * TODO: allow user to reset start location to current location
+ *
+ * @author lshang
+ */
 public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
@@ -284,6 +294,8 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
 
         /*
         https://stackoverflow.com/questions/36785542/how-to-change-the-position-of-my-location-button-in-google-maps-using-android-st/49038586
+        Stackoverflow post by user5710756 https://stackoverflow.com/users/5710756/user5710756
+        Answer https://stackoverflow.com/a/39179202/12826510
          */
 
         // adjust myLocation button position
@@ -301,6 +313,10 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * set map centre to current location
+     * enable my location button
+     */
     private void updateLocationUI() {
         if (mMap == null) {
             return;
@@ -320,6 +336,10 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * move map centre to current location
+     * update mLastKnownLocation
+     */
     private void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
@@ -351,6 +371,10 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * set tmpMarker to clicked location
+     * @param latLng
+     */
     @Override
     public void onMapClick(LatLng latLng) {
         if (tmpMarker == null) {
@@ -362,6 +386,10 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
+    /**
+     * get current location
+     * @return
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();

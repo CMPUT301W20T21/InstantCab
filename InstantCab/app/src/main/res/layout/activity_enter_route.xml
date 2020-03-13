@@ -41,7 +41,8 @@
                 android:paddingLeft="22dp"
                 android:text="Current location"
                 android:textColor="#630A0909"
-                android:textSize="21dp" />
+                android:textSize="21dp"
+                android:singleLine="true" />
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
