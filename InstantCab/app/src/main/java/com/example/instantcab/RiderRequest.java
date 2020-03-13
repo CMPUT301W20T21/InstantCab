@@ -90,7 +90,7 @@ public class RiderRequest extends AppCompatActivity {
                 updateUi(req);
             }
         });
-        
+
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -151,6 +151,12 @@ public class RiderRequest extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * update the start and destination location
+     * update the fare
+     * @param req
+     */
     private void updateUi(Request []req){
         // expect to send in the driver's name and also the fare
         fare = req[0].getFare();
