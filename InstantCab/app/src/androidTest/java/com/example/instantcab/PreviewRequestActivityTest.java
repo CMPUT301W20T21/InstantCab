@@ -10,36 +10,31 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class EnterRouteActivityTest {
+public class PreviewRequestActivityTest {
     private Solo solo;
 
     @Rule
-    public ActivityTestRule<EnterRouteActivity> rule =
-            new ActivityTestRule<>(EnterRouteActivity.class, true, true);
+    public ActivityTestRule<PreviewRequestActivity> rule =
+            new ActivityTestRule<>(PreviewRequestActivity.class, true, true);
 
     /**
-     * Runs before all tests and creates solo instance
-     * @throws Exception
-     */
+     //     * Runs before all tests and creates solo instance
+     //     * @throws Exception
+     //     */
     @Before
     public void setUp() throws Exception{
         solo = new Solo(InstrumentationRegistry.getInstrumentation(), rule.getActivity());
 
-        solo.assertCurrentActivity("Wrong Activity", EnterRouteActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", PreviewRequestActivity.class);
 
-        /*
-        Cannot implement, this is how it should go
-        solo.clickOnMap();
-        solo.clickOnButton("DESTINATION");
-        solo.clickOnButton("NEXT");
-         */
-
+        solo.clickOnButton("SEND REQUEST");
     }
 
-    /* not actually gonna test
+    /*Gonna cause trouble in the next activity and give errors because cannot get current user
+    But this is how it should go
     @Test
     public void checkSwitchActivity(){
-        solo.assertCurrentActivity("Wrong Activity", PreviewRequestActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", RiderRequest.class);
     }
      */
 
@@ -52,3 +47,4 @@ public class EnterRouteActivityTest {
         solo.finishOpenedActivities();
     }
 }
+

@@ -27,6 +27,8 @@ import androidx.appcompat.app.AppCompatActivity;
  * This class is an activity used for the rider to tip the driver and also calculate
  * the total amount of money the rider needs to pay. Then it leads to
  * another payment activity which generates QR code.
+ *
+ * @author lijiangn
  */
 public class PaymentActivity extends AppCompatActivity {
     private Button ButtonPay;
@@ -43,6 +45,7 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
         fare = getIntent().getStringExtra("FARE");
+        if (fare == null) fare = "10";
 
         ButtonPay = findViewById(R.id.pay);
         ButtonTip = findViewById(R.id.tip);

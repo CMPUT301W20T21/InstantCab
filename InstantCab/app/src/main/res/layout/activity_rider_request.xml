@@ -30,6 +30,7 @@
     </TextView>
 
     <TextView
+        android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -50,6 +51,7 @@
     </TextView>
 
     <TextView
+        android:id="@+id/end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -110,7 +112,7 @@
             android:id="@+id/cancel_request"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/cancel_request"
+            android:text="CANCEL REQUEST"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/confirm_request"
