@@ -103,13 +103,5 @@
     </TextView>
 
 
-    <Button
-        android:id="@+id/cancel_request"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel_request"
-        android:background="#C12D2D38"
-        android:visibility="visible"/>
-
 
 </LinearLayout>

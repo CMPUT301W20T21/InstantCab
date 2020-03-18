@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,10 +50,14 @@ public class LogActivity extends AppCompatActivity {
     private String type;
     private String TAG = "Email Password";
 
+    private ProgressBar progressBar;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_view);
+
+        progressBar = findViewById(R.id.progressBar);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -63,6 +68,8 @@ public class LogActivity extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                progressBar.setVisibility(View.VISIBLE);
 
                 final String mailText = email.getText().toString();
                 String pass = password.getText().toString();

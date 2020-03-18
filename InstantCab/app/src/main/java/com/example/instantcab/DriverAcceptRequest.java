@@ -21,12 +21,13 @@ public class DriverAcceptRequest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_accept_request);
 
+        //retrieve data form DriverLocationActivity onMarkerClickListener
         Intent intent = getIntent();
         strFrom = intent.getExtras().getString("from");
         strTo = intent.getExtras().getString("to");
         strEmail = intent.getExtras().getString("email");
         strFare = intent.getExtras().getString("fare");
-
+        //apply data into TextView
         textFrom = findViewById(R.id.from);
         textFrom.setText(strFrom);
         textTo = findViewById(R.id.to);
