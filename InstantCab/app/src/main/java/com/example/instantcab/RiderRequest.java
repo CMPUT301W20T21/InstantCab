@@ -25,16 +25,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.MetadataChanges;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * This class provides an activity to show a request page to the
@@ -52,11 +61,12 @@ public class RiderRequest extends AppCompatActivity {
     private TextView showFare;
     private TextView starting;
     private TextView destination;
-    private Boolean driverAccept;
     private String driverName;
+    private String driverEmail = "";
     private String fare;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    int indicator = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +91,41 @@ public class RiderRequest extends AppCompatActivity {
         else {email = "test@email.com";}
         mAuth = FirebaseAuth.getInstance();
         final Request[] req = {new Request()};
+        req[0] = new Request("", 0.0, 0.0, 0.0, 0.0, "", "", "", "");
         CollectionReference requests = db.collection("Request");
-        final DocumentReference request = requests.document(email);
+        DocumentReference request = requests.document(email);
         request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 req[0] = documentSnapshot.toObject(Request.class);
                 updateUi(req);
+            }
+        });
+
+        request.addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (snapshot != null && snapshot.exists()) {
+                    driverEmail = snapshot.getString("driver");
+                    if (driverEmail != null && indicator == 0) {
+                        indicator += 1;
+
+                        // TODO: the driver name cannot be shown
+                        DocumentReference doc = db.collection("Users").document(driverEmail);
+                        doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                driverName = documentSnapshot.getString("phone");
+                            }
+                        });
+
+                        req[0].setDriver(driverEmail);
+                        driverStatus.setText("Driver picked up request");
+                        showDriver.setText(driverName);
+                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         });
 
@@ -97,23 +135,13 @@ public class RiderRequest extends AppCompatActivity {
                 // Clicked when the rider cancels the request
                 req[0].setStatus("cancelled");
                 db.collection("Request").document(email).set(req[0]);
-                // need to notify the driver
-
                 // move back to the map activity
                 Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
                 startActivity(intent);
             }
         });
 
-//        if (driverAccept) {
-//            driverStatus.setText("Driver picked up request");
-//            showDriver.setText(driverName);
-//            ButtonConfirmRequest.setVisibility(View.VISIBLE);
-//            req[0].setStatus("accepted");
-//            db.collection("Request").document(email).set(req[0]);
-//
-//            // TODO: need the app to fire a notification
-//        }
+        // TODO: need the app to issue a notification
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,7 +151,8 @@ public class RiderRequest extends AppCompatActivity {
                 ButtonCancelRequest.setVisibility(View.INVISIBLE);
                 ButtonConfirmRequest.setVisibility(View.INVISIBLE);
 
-                // TODO: does need to notify the driver
+                req[0].setStatus("confirmed");
+                db.collection("Request").document(email).set(req[0]);
             }
         });
 
@@ -149,13 +178,25 @@ public class RiderRequest extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-    }
 
+        // when click on the driver's username, show his/her contact info
+        showDriver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!driverName.equals("")) {
+                    Intent intent = new Intent(RiderRequest.this, ProfileActivity.class);
+                    intent.putExtra("DRIVER", driverEmail);
+                    startActivity(intent);
+                }
+            }
+        });
+    }
 
     /**
      * update the start and destination location
      * update the fare
      * @param req
+     * the rider request object
      */
     private void updateUi(Request []req){
         // expect to send in the driver's name and also the fare
