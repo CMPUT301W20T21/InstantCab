@@ -91,7 +91,7 @@ public class RiderRequest extends AppCompatActivity {
         else {email = "test@email.com";}
         mAuth = FirebaseAuth.getInstance();
         final Request[] req = {new Request()};
-        req[0] = new Request("", 0.0, 0.0, 0.0, 0.0, "", "", "", "");
+        //req[0] = new Request("", 0.0, 0.0, 0.0, 0.0, "", "", "", "");
         CollectionReference requests = db.collection("Request");
         DocumentReference request = requests.document(email);
         request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -116,13 +116,13 @@ public class RiderRequest extends AppCompatActivity {
                         doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                driverName = documentSnapshot.getString("phone");
+                                driverName = documentSnapshot.getString("username");
+                                showDriver.setText(driverName);
                             }
                         });
 
                         req[0].setDriver(driverEmail);
                         driverStatus.setText("Driver picked up request");
-                        showDriver.setText(driverName);
                         ButtonConfirmRequest.setVisibility(View.VISIBLE);
                     }
                 }
