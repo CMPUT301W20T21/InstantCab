@@ -56,7 +56,10 @@
         <EditText
             android:id="@+id/tip_amount"
             android:layout_width="100sp"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:digits="0123456789."
+            android:inputType="number"
+            />
 
         <Button
             android:id="@+id/tip"
