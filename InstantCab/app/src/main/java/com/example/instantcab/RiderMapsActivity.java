@@ -2,19 +2,22 @@ package com.example.instantcab;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -22,7 +25,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -30,6 +32,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Locale;
 
@@ -38,7 +44,7 @@ import java.util.Locale;
  * When user clicks on the make a request text box it brings user to EnterRouteActivity
  * @author lshang
  */
-public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
+public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
@@ -64,12 +70,19 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     public Location mLastKnownLocation;
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rider_home);
+
         getLocationPermission();
+
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        db = FirebaseFirestore.getInstance();
 
         geocoder = new Geocoder(RiderMapsActivity.this, Locale.getDefault());
 
@@ -94,6 +107,8 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
                 startActivityForResult(intent, ENTER_ROUTE_REQUEST);
             }
         });
+
+        updateUI();
 
 
         // sign in for testing
@@ -311,6 +326,64 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.current_request) {
+            Intent intent = new Intent(this, RiderRequest.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void updateUI(){
+        if (user != null) {
+            // User is signed in
+            String email = user.getEmail();
+            /*
+            https://stackoverflow.com/questions/53332471/checking-if-a-document-exists-in-a-firestore-collection
+             */
+            DocumentReference docIdRef = db.collection("Request").document(email);
+            docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "Document exists!");
+                            makeRequest.setText("You have an active request");
+                            makeRequest.setTextColor(Color.BLACK);
+                            makeRequest.setClickable(false);
+                        } else {
+                            Log.d(TAG, "Document does not exist!");
+                            makeRequest.setHint("Make a request");
+                            makeRequest.setClickable(true);
+                        }
+                    } else {
+                        Log.d(TAG, "Failed with: ", task.getException());
+                    }
+                }
+            });
+            Log.i("have user", email);
+        } else {
+            // No user is signed in
+            Log.i("does not have user", "fail");
         }
     }
 }
