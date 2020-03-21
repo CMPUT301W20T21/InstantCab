@@ -20,8 +20,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -91,7 +93,6 @@ public class RiderRequest extends AppCompatActivity {
         else {email = "test@email.com";}
         mAuth = FirebaseAuth.getInstance();
         final Request[] req = {new Request()};
-        //req[0] = new Request("", 0.0, 0.0, 0.0, 0.0, "", "", "", "");
         CollectionReference requests = db.collection("Request");
         DocumentReference request = requests.document(email);
         request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -133,8 +134,17 @@ public class RiderRequest extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
-                req[0].setStatus("cancelled");
-                db.collection("Request").document(email).set(req[0]);
+                db.collection("Request").document(email)
+                        .delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {}
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {}
+                        });
+
                 // move back to the map activity
                 Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
                 startActivity(intent);

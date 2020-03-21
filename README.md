@@ -69,3 +69,5 @@ Answer https://stackoverflow.com/a/39179202/12826510
 * Manage Users in Firebase: https://firebase.google.com/docs/auth/android/manage-users
 
 * Get realtime updates with Cloud Firestore: https://firebase.google.com/docs/firestore/query-data/listen
+
+* Delete data from Cloud Firestore: https://firebase.google.com/docs/firestore/manage-data/delete-data
