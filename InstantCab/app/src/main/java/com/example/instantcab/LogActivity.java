@@ -93,6 +93,7 @@ public class LogActivity extends AppCompatActivity {
                                     Log.w(TAG, "signInAnonymously:failure", task.getException());
                                     Toast.makeText(LogActivity.this, "Authentication failed.",
                                             Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.INVISIBLE);
                                     updateUI(null, mailText);
                                 }
                             }
