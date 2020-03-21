@@ -123,9 +123,9 @@ public class LogActivity extends AppCompatActivity {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Profile profile = documentSnapshot.toObject(Profile.class);
                 assert profile != null;
-                type = profile.getType();
 
                 if(account != null){
+                    type = profile.getType();
                     Toast.makeText(LogActivity.this,"You signed in successfully",Toast.LENGTH_LONG).show();
                     if(type.equals("Driver")){
                         startActivity(new Intent(LogActivity.this,DriverLocationActivity.class));

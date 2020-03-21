@@ -1,6 +1,7 @@
 package com.example.instantcab;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -34,6 +35,7 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,7 +64,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
     public final static int AUTOCOMPLETE_REQUEST_CODE = 21;
     public final static int SEARCH_RESULT_CODE = 22;
 
-    TextView startLocationBox;
+    private TextView startLocationBox;
 
     String TAG = "EnterRouteActivity";
 
@@ -80,6 +82,8 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
     private Button destinationButton;
     private Button nextButton;
 
+    private FloatingActionButton setCurrentLocButton;
+
     public Geocoder geocoder;
 
     private LatLng startLatLng;
@@ -87,10 +91,12 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
 
     private String startAddr;
     private String destinationAddr;
+    private String currentAddr;
 
     // Set the fields to specify which types of place data to
     // return after the user has made a selection.
-    List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+    List<Place.Field> fields = Arrays.asList(Place.Field.ID,
+            Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +114,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         startButton = findViewById(R.id.start_button);
         destinationButton = findViewById(R.id.destination_button);
         nextButton = findViewById(R.id.next_button);
+        setCurrentLocButton = findViewById(R.id.currentLocation);
 
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -119,7 +126,8 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         currentLon = intent.getExtras().getDouble("Lon");
 
         startLatLng = new LatLng(currentLat, currentLon);
-        startAddr = getAddressFromLatLon(startLatLng);
+        currentAddr = getAddressFromLatLon(startLatLng);
+        startAddr = currentAddr;
 
         startLocationBox = findViewById(R.id.start_location);
 
@@ -250,24 +258,49 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                 }
             }
         });
+
+        setCurrentLocButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startAddr = currentAddr;
+                startLatLng = new LatLng(currentLat, currentLon);
+                startMarker.setPosition(startLatLng);
+                startLocationBox.setText("Current location");
+                startLocationBox.setTextColor(Color.GRAY);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(startLatLng));
+            }
+        });
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == AUTOCOMPLETE_REQUEST_CODE && resultCode == SEARCH_RESULT_CODE) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
 //            Intent intent = new Intent();
-////            Bundle bundle = new Bundle();
-////            bundle.putDouble("Lat", data.getExtras().getDouble("Lat"));
-////            bundle.putDouble("Lon", data.getExtras().getDouble("Lon"));
-////            bundle.putString("Address", data.getExtras().getString("Address"));
-////            intent.putExtras(bundle);
+//            Bundle bundle = new Bundle();
+//            bundle.putDouble("Lat", data.getExtras().getDouble("Lat"));
+//            bundle.putDouble("Lon", data.getExtras().getDouble("Lon"));
+//            bundle.putString("Address", data.getExtras().getString("Address"));
+//            intent.putExtras(bundle);
 //            intent.putExtras(data.getExtras());
 //            setResult(RiderMapsActivity.ROUTE_RESULT_CODE, intent);
 //            finish();
-//        }
-//
-//    }
+            if(resultCode == RESULT_OK) {
+                Log.i("onActivityResult", "we have a result");
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                startAddr = place.getName();
+                startLatLng = place.getLatLng();
+                startLocationBox.setText(startAddr);
+                startLocationBox.setTextColor(Color.BLACK);
+                startMarker.setPosition(startLatLng);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(startMarker.getPosition()));
+            }
+        }
+        else{
+            Log.i("onActivityResult", "NO result request code "+Integer.toString(requestCode)+" result code" + resultCode);
+        }
+
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
