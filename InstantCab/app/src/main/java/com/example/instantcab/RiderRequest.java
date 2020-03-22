@@ -58,24 +58,22 @@ public class RiderRequest extends AppCompatActivity {
     private Button ButtonConfirmRequest;
     private Button ButtonPickedUp;
     private Button ButtonArrive;
+    private Button ButtonBack;
     private TextView driverStatus;
     private TextView showDriver;
     private TextView showFare;
     private TextView starting;
     private TextView destination;
     private String driverName;
-    private String driverEmail = "";
+    private String driverEmail;
     private String fare;
-    private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    int indicator = 0;
+    int indicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_rider_request);
-
         ButtonCancelRequest = findViewById(R.id.cancel_request);
         ButtonConfirmRequest = findViewById(R.id.confirm_request);
         ButtonPickedUp = findViewById(R.id.picked_up);
@@ -91,15 +89,28 @@ public class RiderRequest extends AppCompatActivity {
         final String email;
         if (user != null) email = user.getEmail();
         else {email = "test@email.com";}
-        mAuth = FirebaseAuth.getInstance();
         final Request[] req = {new Request()};
         CollectionReference requests = db.collection("Request");
-        DocumentReference request = requests.document(email);
+        final DocumentReference request = requests.document(email);
         request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 req[0] = documentSnapshot.toObject(Request.class);
-                updateUi(req);
+                if (req[0] == null) {
+                    // indicate that there is no request
+                    setContentView(R.layout.activity_no_request);
+                    ButtonBack = findViewById(R.id.back);
+
+                    ButtonBack.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Clicked when the rider confirms his request
+                            Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                }
+                else updateUi(req);
             }
         });
 
@@ -107,24 +118,35 @@ public class RiderRequest extends AppCompatActivity {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot,
                                 @Nullable FirebaseFirestoreException e) {
+                if (req[0] == null) {
+                    request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            req[0] = documentSnapshot.toObject(Request.class);
+                        }
+                    });
+                }
                 if (snapshot != null && snapshot.exists()) {
                     driverEmail = snapshot.getString("driver");
                     if (driverEmail != null && indicator == 0) {
                         indicator += 1;
 
-                        // TODO: the driver name cannot be shown
+                        // display the driver name
                         DocumentReference doc = db.collection("Users").document(driverEmail);
                         doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 driverName = documentSnapshot.getString("username");
                                 showDriver.setText(driverName);
+                                req[0] = documentSnapshot.toObject(Request.class);
+                                req[0].setDriver(driverEmail);
+                                if (driverStatus.getText() == "Waiting for driver to pick up") {
+                                    ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                                    driverStatus.setText("Driver picked up request");
+                                    //changeStatus(req, email, request, "accepted");
+                                }
                             }
                         });
-
-                        req[0].setDriver(driverEmail);
-                        driverStatus.setText("Driver picked up request");
-                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -157,12 +179,11 @@ public class RiderRequest extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider confirms his request
+                driverStatus.setText("Driver is on the way");
                 ButtonPickedUp.setVisibility(View.VISIBLE);
-                ButtonCancelRequest.setVisibility(View.INVISIBLE);
                 ButtonConfirmRequest.setVisibility(View.INVISIBLE);
 
-                req[0].setStatus("confirmed");
-                db.collection("Request").document(email).set(req[0]);
+                changeStatus(req, email, "confirmed");
             }
         });
 
@@ -173,6 +194,9 @@ public class RiderRequest extends AppCompatActivity {
                 driverStatus.setText("Driver picked up rider");
                 ButtonPickedUp.setVisibility(View.INVISIBLE);
                 ButtonArrive.setVisibility(View.VISIBLE);
+                ButtonCancelRequest.setVisibility(View.INVISIBLE);
+
+                changeStatus(req, email, "picked up");
             }
         });
 
@@ -181,8 +205,17 @@ public class RiderRequest extends AppCompatActivity {
             public void onClick(View v) {
                 // Clicked when the driver arrives the destination
                 // go to the payment intent
-                req[0].setStatus("finished");
-                db.collection("Request").document(email).set(req[0]);
+                db.collection("Request").document(email)
+                        .delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {}
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {}
+                        });
+
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
                 startActivity(intent);
@@ -198,6 +231,17 @@ public class RiderRequest extends AppCompatActivity {
                     intent.putExtra("DRIVER", driverEmail);
                     startActivity(intent);
                 }
+            }
+        });
+
+        ButtonBack = findViewById(R.id.back);
+
+        ButtonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Clicked when the rider confirms his request
+                Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -217,5 +261,65 @@ public class RiderRequest extends AppCompatActivity {
         // show pick-up point and destination
         destination.setText(req[0].getDestinationName());
         starting.setText(req[0].getStartLocationName());
+
+        //
+        if (req[0].getStatus() != null) {
+            displayDriver(driverEmail);
+            String a = req[0].getStatus();
+            switch (a) {
+                case "accepted":
+                    driverStatus.setText("Driver picked up request");
+                    ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                    break;
+                case "confirmed":
+                    driverStatus.setText("Driver is on the way");
+                    ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+                    ButtonPickedUp.setVisibility(View.VISIBLE);
+                    break;
+                case "picked up":
+                    driverStatus.setText("Driver picked up rider");
+                    ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+                    ButtonCancelRequest.setVisibility(View.INVISIBLE);
+                    ButtonPickedUp.setVisibility(View.INVISIBLE);
+                    ButtonArrive.setVisibility(View.VISIBLE);
+                    break;
+                case "pending":
+                    driverStatus.setText("Waiting for driver to pick up");
+                    break;
+            }
+        }
+    }
+
+    /**
+     * show the name of the driver
+     * @param driverEmail
+     * the rider request object
+     */
+    private void displayDriver(String driverEmail) {
+        if (driverEmail != null) {
+            DocumentReference doc = db.collection("Users").document(driverEmail);
+            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    driverName = documentSnapshot.getString("username");
+                    showDriver.setText(driverName);
+                }
+            });
+        }
+    }
+
+    /**
+     * change the status of the request
+     */
+    private void changeStatus(final Request []req, String email, String status) {
+        DocumentReference request = db.collection("Request").document(email);
+        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                req[0] = documentSnapshot.toObject(Request.class);
+            }
+        });
+        req[0].setStatus(status);
+        db.collection("Request").document(email).set(req[0]);
     }
 }
