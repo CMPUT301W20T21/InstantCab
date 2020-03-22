@@ -53,7 +53,8 @@ public class PaymentActivity extends AppCompatActivity {
         tipAmount = findViewById(R.id.tip_amount);
         // show the fare
         showFare = findViewById(R.id.fare);
-        showFare.setText("$"+fare);
+        showFare.setText(fare);
+        fare = fare.replace("$",""); // get rid of the dollar sign
         totalCost.setText(String.format(getString(R.string.total), Float.parseFloat(fare)));
 
         ButtonTip.setOnClickListener(new View.OnClickListener() {
