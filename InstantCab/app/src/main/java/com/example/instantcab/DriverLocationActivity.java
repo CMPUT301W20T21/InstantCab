@@ -163,7 +163,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         //display driver's current position
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Driver Location");
-        mMap.addCircle(new CircleOptions().center(latLng).radius(20).strokeColor(Color.RED).fillColor(Color.BLUE)););
+        mMap.addCircle(new CircleOptions().center(latLng).radius(20).strokeColor(Color.RED).fillColor(Color.BLUE));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         mMap.addMarker(markerOptions);
         //click on marker event

@@ -316,16 +316,17 @@ public class RiderRequest extends AppCompatActivity {
     /**
      * change the status of the request
      */
-    private void changeStatus(final Request []req, String email, String status) {
+    private void changeStatus(final Request []req, final String email, final String status) {
         DocumentReference request = db.collection("Request").document(email);
         request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 req[0] = documentSnapshot.toObject(Request.class);
+                req[0].setStatus(status);
+                db.collection("Request").document(email).set(req[0]);
             }
         });
-        req[0].setStatus(status);
-        db.collection("Request").document(email).set(req[0]);
+
     }
 
     public void loadLocalRequest(){
