@@ -90,7 +90,9 @@ public class SignUpAct extends AppCompatActivity {
                     flag.setVisibility(View.VISIBLE);
                 }
                 else {
-                    boolean check;
+                    boolean check1;
+                    boolean check2;
+                    boolean check3;
                     boolean fullCheck = false;
                     ArrayList<Boolean> boolList = new ArrayList<>();
                     username = findViewById(R.id.signUser);
@@ -101,13 +103,10 @@ public class SignUpAct extends AppCompatActivity {
                     final String mailText = email.getText().toString();
                     String pass = password.getText().toString();
                     String pNum = phone.getText().toString();
-                    check = CheckFlag.isEmail(mailText);
-                    boolList.add(check);
-                    check = CheckFlag.isPassword(pass);
-                    boolList.add(check);
-                    check = CheckFlag.isPhone(pNum);
-                    boolList.add(check);
-                    checkAllTrue(boolList);
+                    check1 = CheckFlag.isEmail(mailText);
+                    check2 = CheckFlag.isPassword(pass);
+                    check3 = CheckFlag.isPhone(pNum);
+                    fullCheck = checkAllTrue(check1,check2,check3);
                     if(fullCheck){
                         if(driver.isChecked()){
                             type = "Driver";
@@ -211,12 +210,14 @@ public class SignUpAct extends AppCompatActivity {
         }
     }
 
-    public static boolean checkAllTrue(ArrayList<Boolean> boolList){
-        for(int i = 0; i < boolList.size(); i++){
-            if(boolList.get(i) != Boolean.TRUE){
-                return false;
+    public static boolean checkAllTrue(boolean check1, boolean check2, boolean check3){
+        if(check1){
+            if (check2){
+                if (check3){
+                    return true;
+                }
             }
         }
-        return true;
+        return false;
     }
 }
