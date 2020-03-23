@@ -48,8 +48,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:paddingLeft="10dp"
-                android:textSize="20dp"
-                android:hint="Southgate Mall"/>
+                android:textSize="20dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -66,8 +65,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:paddingLeft="10dp"
-                android:textSize="20dp"
-                android:hint="$15.00"/>
+                android:textSize="20dp"/>
         </LinearLayout>
 
         <LinearLayout

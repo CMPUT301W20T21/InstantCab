@@ -23,7 +23,7 @@
 
         <activity android:name=".PaymentActivity" />
 
-        <activity android:name=".Profile" />
+        <activity android:name=".ProfileActivity" />
 
         <activity android:name=".Rating" />
 
