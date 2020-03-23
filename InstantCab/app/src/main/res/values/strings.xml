@@ -9,7 +9,7 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">Home</string>
     <string name="google_maps_key">AIzaSyB3pJ8XeAILHM2w5hLwh7LYxjhg7Th6r_E</string>
     <string name="current_request">Current Request</string>
     <string name="from">From</string>
@@ -19,7 +19,7 @@
     <string name="pay">Pay</string>
     <string name="tip_your_driver">Tip your driver</string>
     <string name="tip">TIP</string>
-    <string name="total">Total cost %.2f</string>
+    <string name="total">Total cost $%.2f</string>
     <string name="confirm">Confirm</string>
     <string name="how_was_your_experience_n_with_the_driver">How was your experience\n with the Driver?</string>
     <string name="bad">Bad</string>

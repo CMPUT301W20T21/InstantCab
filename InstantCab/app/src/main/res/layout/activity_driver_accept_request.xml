@@ -34,7 +34,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:hint="Hub Mall"
         android:textSize="24sp"
         android:textStyle="bold">
 
@@ -55,7 +54,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:hint="Southgate Mall"
         android:textSize="24sp"
         android:textStyle="bold">
 
@@ -76,7 +74,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:hint="John Doe"
         android:textSize="24sp"
         android:textStyle="bold">
     </TextView>
@@ -96,7 +93,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:hint="$15.00"
         android:textSize="24sp"
         android:textStyle="bold">
 
