@@ -73,6 +73,8 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
     private FirebaseFirestore db;
     private FirebaseUser user;
 
+    public static String userEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +84,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        userEmail =user.getEmail();
         db = FirebaseFirestore.getInstance();
 
         geocoder = new Geocoder(RiderMapsActivity.this, Locale.getDefault());
@@ -346,6 +349,10 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         //noinspection SimplifiableIfStatement
         if (id == R.id.current_request) {
             Intent intent = new Intent(this, RiderRequest.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.profile){
+            Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
         }
 
