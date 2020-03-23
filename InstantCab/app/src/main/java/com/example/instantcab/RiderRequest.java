@@ -15,7 +15,9 @@
 package com.example.instantcab;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -42,7 +44,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.MetadataChanges;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -321,5 +326,40 @@ public class RiderRequest extends AppCompatActivity {
         });
         req[0].setStatus(status);
         db.collection("Request").document(email).set(req[0]);
+    }
+
+    public void loadLocalRequest(){
+        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(RiderMapsActivity.userEmail, "");
+        Type type = new TypeToken<Request>() {}.getType();
+        Request request = gson.fromJson(json, type);
+
+        // check if there is any data
+        if(request == null){
+            // set text "no active request"
+        }
+        else{
+            // set corresponding buttons and text
+        }
+    }
+
+    public void updateLocalRequest(Request request){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // User is signed in
+            String email = user.getEmail();
+            Log.i("have user", email);
+
+            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(request);
+            editor.putString(email, json);
+            editor.apply();
+        } else {
+            // No user is signed in
+            Log.i("does not have user", "fail");
+        }
     }
 }
