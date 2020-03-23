@@ -54,31 +54,19 @@ public class PayQRAct extends AppCompatActivity {
     private int good = 0;
     private int bad = 0;
     private String TAG = "Updated";
-    private FirebaseFirestore db;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String email;
+    //private String driverEmail;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstances){
         super.onCreate(savedInstances);
         setContentView(R.layout.qr_pay_activity);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if(user != null){
-            email = user.getEmail();
-
-            db = FirebaseFirestore.getInstance();
-            DocumentReference dbDoc = db.collection("Rating").document(email);
-            dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Rating rating = documentSnapshot.toObject(Rating.class);
-                    assert rating != null;
-                    good = rating.getGood();
-                    bad = rating.getBad();
-                }
-            });
-        }
+        /**
+         * This block needs to be changed in order to get the email of the driver rather than the rider
+         */
+        email = getDriverEmail();
 
 
         Button confirm = findViewById(R.id.paymentConfirm);
@@ -89,35 +77,69 @@ public class PayQRAct extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(rate.getCheckedRadioButtonId() != -1){
-                    if(goodButton.isChecked()){
-                        good += 1;
-                    }
-                    else{
-                        bad += 1;
-                    }
-                }
-                Rating newRating = new Rating(good,bad);
-                db.collection("Rating").document(email).set(newRating)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "RatingUpdated: Success");
+                DocumentReference dbDoc = db.collection("Rating").document(email);
+                dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Rating rating = documentSnapshot.toObject(Rating.class);
+                        assert rating != null;
+                        good = rating.getGood();
+                        bad = rating.getBad();
+                        if(rate.getCheckedRadioButtonId() != -1){
+                            if(goodButton.isChecked()){
+                                good += 1;
                             }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "RatingUpdated: Failure");
+                            else{
+                                bad += 1;
                             }
-                        });
-
-
-                startActivity(new Intent(PayQRAct.this,RiderMapsActivity.class));
-
+                            updateRating(good,bad);
+                        }
+                    }
+                });
 
             }
         });
+
+
+    }
+
+    public String getDriverEmail(){
+        final String[] driverEmail = new String[1];
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null){
+            email = user.getEmail();
+        }
+
+        DocumentReference dbDriver = db.collection("Request").document(email);
+        dbDriver.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Request request = documentSnapshot.toObject(Request.class);
+                assert request != null;
+                driverEmail[0] = request.getDriver();
+            }
+        });
+        return driverEmail[0];
+    }
+
+    public void updateRating(int good, int bad){
+        Rating newRating = new Rating(good,bad);
+        db.collection("Rating").document(email).set(newRating)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "RatingUpdated: Success");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "RatingUpdated: Failure");
+                    }
+                });
+
+
+        startActivity(new Intent(PayQRAct.this,RiderMapsActivity.class));
 
 
     }

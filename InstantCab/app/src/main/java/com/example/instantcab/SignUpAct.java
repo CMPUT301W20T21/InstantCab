@@ -40,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -89,6 +90,11 @@ public class SignUpAct extends AppCompatActivity {
                     flag.setVisibility(View.VISIBLE);
                 }
                 else {
+                    boolean check1;
+                    boolean check2;
+                    boolean check3;
+                    boolean fullCheck = false;
+                    ArrayList<Boolean> boolList = new ArrayList<>();
                     username = findViewById(R.id.signUser);
                     email = findViewById(R.id.signEmail);
                     password = findViewById(R.id.signPass);
@@ -97,36 +103,46 @@ public class SignUpAct extends AppCompatActivity {
                     final String mailText = email.getText().toString();
                     String pass = password.getText().toString();
                     String pNum = phone.getText().toString();
-                    if(driver.isChecked()){
-                        type = "Driver";
-                    }
-                    if(rider.isChecked()){
-                        type = "Rider";
-                    }
-                    profile = new Profile(mailText, user, pNum, type);
-                    /**
-                     * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
-                     * from the "Create a Password based account" section part 4
-                     */
-                    mAuth.createUserWithEmailAndPassword(mailText, pass)
-                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful()) {
-                                        // Sign in success, update UI with the signed-in user's information
-                                        Log.d(TAG, "createUserWithEmail:success");
-                                        FirebaseUser user = mAuth.getCurrentUser();
+                    check1 = CheckFlag.isEmail(mailText);
+                    check2 = CheckFlag.isPassword(pass);
+                    check3 = CheckFlag.isPhone(pNum);
+                    fullCheck = checkAllTrue(check1,check2,check3);
+                    if(fullCheck){
+                        if(driver.isChecked()){
+                            type = "Driver";
+                        }
+                        if(rider.isChecked()){
+                            type = "Rider";
+                        }
+                        profile = new Profile(mailText, user, pNum, type);
+                        /**
+                         * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
+                         * from the "Create a Password based account" section part 4
+                         */
+                        mAuth.createUserWithEmailAndPassword(mailText, pass)
+                                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            // Sign in success, update UI with the signed-in user's information
+                                            Log.d(TAG, "createUserWithEmail:success");
+                                            FirebaseUser user = mAuth.getCurrentUser();
 
-                                        updateUI(user, mailText);
-                                    } else {
-                                        // If sign in fails, display a message to the user.
-                                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                        Toast.makeText(SignUpAct.this, "Authentication failed.",
-                                                Toast.LENGTH_SHORT).show();
-                                        updateUI(null, mailText);
+                                            updateUI(user, mailText);
+                                        } else {
+                                            // If sign in fails, display a message to the user.
+                                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                            Toast.makeText(SignUpAct.this, "Authentication failed.",
+                                                    Toast.LENGTH_SHORT).show();
+                                            updateUI(null, mailText);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                    }
+                    else {
+                        flag.setVisibility(View.VISIBLE);
+                    }
+
                 }
 
             }
@@ -192,5 +208,16 @@ public class SignUpAct extends AppCompatActivity {
         }else {
             Toast.makeText(this,"You did not sign in",Toast.LENGTH_LONG).show();
         }
+    }
+
+    public static boolean checkAllTrue(boolean check1, boolean check2, boolean check3){
+        if(check1){
+            if (check2){
+                if (check3){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
