@@ -1,6 +1,7 @@
 package com.example.instantcab;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -28,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firestore.v1.WriteResult;
+import com.google.gson.Gson;
 import com.google.maps.android.SphericalUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -138,6 +140,8 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         sendRequestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                saveLocalRequest();
+
                 sendRequest();
 //                Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
 //                startActivity(intent);
@@ -454,5 +458,27 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         }
 
         return builder.toString().split(",")[0];
+    }
+
+    public void saveLocalRequest(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // User is signed in
+            String email = user.getEmail();
+            Log.i("have user", email);
+
+            Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude,
+                    destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
+
+            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(request);
+            editor.putString(email, json);
+            editor.apply();
+        } else {
+            // No user is signed in
+            Log.i("does not have user", "fail");
+        }
     }
 }
