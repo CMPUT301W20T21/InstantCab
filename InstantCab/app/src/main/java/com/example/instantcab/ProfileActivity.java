@@ -109,10 +109,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     private void init() {
         toolbar = findViewById(R.id.toolbar_activity_info);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setHomeButtonEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayShowTitleEnabled(false);
         user= findViewById(R.id.user);
         username = findViewById(R.id.username);
         num = findViewById(R.id.num);
