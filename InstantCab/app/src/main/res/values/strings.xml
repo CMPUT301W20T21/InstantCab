@@ -29,4 +29,5 @@
     <string name="rating">rating</string>
     <string name="cancel">cancel</string>
     <string name="ok">ok</string>
+    <string name="choose_email">Choose a email send App</string>
 </resources>
