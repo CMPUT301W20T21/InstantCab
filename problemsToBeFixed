@@ -1,10 +1,6 @@
-driver request page: make rider name clickable
+profile activity has error (related to toolbar, fixed for now); not displaying phone number, wrong email; no back button
 
-profile activity has error(related to toolbar, fixed for now); not displaying phone number, wrong email; no back button
+Driver home not showing start location or fare; does not check if have active request; no error checking when no request chosen; does not update Firebase when a request is accepted
 
-Driver home not showing start location or fare; does not check if have active request; no error checking when no request chosen; does not update firebase when a request is accepted
-
-driver request cannot click on rider's name yet; no back button
-
-in tipping driver activity, pressing tip button with empty box causes error
+driver request cannot click on rider's name; no back button
 

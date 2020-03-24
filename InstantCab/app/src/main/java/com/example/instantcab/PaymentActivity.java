@@ -61,9 +61,11 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Click to tip
-                tip = Float.parseFloat((tipAmount.getText().toString()));
-                total = tip + Float.parseFloat(fare);
-                totalCost.setText(String.format(getString(R.string.total), total));
+                if (!tipAmount.getText().toString().equals("")) {
+                    tip = Float.parseFloat((tipAmount.getText().toString()));
+                    total = tip + Float.parseFloat(fare);
+                    totalCost.setText(String.format(getString(R.string.total), total));
+                }
             }
         });
 
