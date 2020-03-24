@@ -14,9 +14,7 @@
 
 package com.example.instantcab;
 
-import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -47,6 +45,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private Toolbar toolbar;
     private int viewType;
     private EditDialog editDialog;
+    private OKCancelDialog okCancelDialog;
 
     private ImageView user;
     private TextView username;
@@ -54,7 +53,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private ImageView num_edit;
     private TextView pr_email;
     private ImageView email_edit;
-    private ImageView ic_email;
     private LinearLayout rating;
     private TextView thumb_up;
     private TextView thumb_down;
@@ -66,6 +64,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private String email;
     private String name;
     private String type;
+    private ImageView iv_call;
+    private ImageView iv_email;
     private String TAG = "Email Password";
 
     @Override
@@ -122,17 +122,21 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         rating = findViewById(R.id.rating);
         thumb_up = findViewById(R.id.thumb_up);
         thumb_down = findViewById(R.id.thumb_down);
+        iv_email = findViewById(R.id.iv_email);
+        iv_call = findViewById(R.id.iv_call);
 
         if (type == "Driver") {
-            num_edit.setVisibility(View.VISIBLE);
-            email_edit.setVisibility(View.VISIBLE);
+            num_edit.setVisibility(View.GONE);
+            email_edit.setVisibility(View.GONE);
             thumb_up.setText(String.valueOf(good));
             thumb_down.setText(String.valueOf(bad));
             rating.setVisibility(View.VISIBLE);
+            iv_call.setVisibility(View.VISIBLE);
+            iv_email.setVisibility(View.VISIBLE);
         }
         else {
-            num_edit.setVisibility(View.GONE);
-            email_edit.setVisibility(View.GONE);
+            num_edit.setVisibility(View.VISIBLE);
+            email_edit.setVisibility(View.VISIBLE);
         }
         num.setText(phone);
         pr_email.setText(email);
@@ -195,6 +199,36 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 editDialog.show(email);
+                break;
+
+            /*make a call
+             * */
+
+            case R.id.iv_call:
+                okCancelDialog = new OKCancelDialog(this);
+                okCancelDialog.setCancelable(false);
+                okCancelDialog.setOkClickListener(new OKCancelDialog.OKClickListener() {
+                    @Override
+                    public void Ok() {
+                        CallUtils.callPhone(ProfileActivity.this,phone);
+                        okCancelDialog.dismiss();
+                    }
+                });
+                okCancelDialog.setOnCancelClickListener(new OKCancelDialog.OnCancelClickListener() {
+                    @Override
+                    public void cancel() {
+                        okCancelDialog.dismiss();
+                    }
+                });
+
+                okCancelDialog.show();
+                okCancelDialog.setOKCancel(R.string.ok,R.string.cancel);
+                okCancelDialog.setTvTitle("Call "+phone);
+                break;
+            /*send a email
+             * */
+            case R.id.iv_email:
+                CallUtils.sendMail(this,email);
                 break;
         }
     }

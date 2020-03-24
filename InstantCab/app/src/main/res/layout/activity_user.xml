@@ -98,6 +98,13 @@
                         android:visibility="gone"
                         tools:visibility="visible" />
 
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_call"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_call"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
@@ -134,8 +141,16 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_menu_edit"
+                        tools:visibility="visible" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_email"
+                        android:layout_width="24dp"
+                        android:layout_height="match_parent"
+                        android:src="@android:drawable/sym_action_email"
                         android:visibility="gone"
                         tools:visibility="visible" />
+
                 </LinearLayout>
             </LinearLayout>
 

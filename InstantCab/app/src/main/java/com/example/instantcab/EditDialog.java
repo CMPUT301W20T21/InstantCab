@@ -24,6 +24,8 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
 
 /**
  * This edit dialog box used for edit email and phone number
