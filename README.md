@@ -1,6 +1,6 @@
 # `InstantCab`
 ```
-Copyright 2020 CMPUT301W20T21
+ Copyright 2020 CMPUT301W20T21
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -52,16 +52,16 @@ Answer https://stackoverflow.com/a/39179202/12826510
  
 * Java Code Examples for `GoogleMap.OnMarkerClickListener` https://www.programcreek.com/java-api-examples/index.php?api=com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
  
-* GoogleMap API for Android by xingchen https://www.cnblogs.com/zhujiabin/p/7570960.html
+* Google Maps API for Android by xingchen https://www.cnblogs.com/zhujiabin/p/7570960.html
 
 ## References under author `hgou`
 * Firebase documents https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
 
 * Android Developers documents for making dialogues https://developer.android.com/guide/topics/ui/dialogs
 
-* Android Developers documents for icon on profile https://developer.android.com/reference/android/graphics/drawable/Drawable
+* Android Developers documents for icon in the profile https://developer.android.com/reference/android/graphics/drawable/Drawable
 
-* Android Developers documents for make a call https://developer.android.com/guide/topics/connectivity/telecom/selfManaged
+* Android Developers documents for making a call https://developer.android.com/guide/topics/connectivity/telecom/selfManaged
 
 ## References under author `lijiangn`
 * Firebase documents: https://firebase.google.com/docs/database/android/read-and-write
