@@ -61,6 +61,8 @@ Answer https://stackoverflow.com/a/39179202/12826510
 
 * Android Developers documents for icon on profile https://developer.android.com/reference/android/graphics/drawable/Drawable
 
+* Android Developers documents for make a call https://developer.android.com/guide/topics/connectivity/telecom/selfManaged
+
 ## References under author `lijiangn`
 * Firebase documents: https://firebase.google.com/docs/database/android/read-and-write
 
