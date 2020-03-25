@@ -14,6 +14,8 @@
 
 package com.example.instantcab;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -144,11 +147,13 @@ public class RiderRequest extends AppCompatActivity {
                                 driverName = documentSnapshot.getString("username");
                                 showDriver.setText(driverName);
                                 req[0] = documentSnapshot.toObject(Request.class);
-                                req[0].setDriver(driverEmail);
-                                if (driverStatus.getText() == "Waiting for driver to pick up") {
+                                if (driverStatus.getText() == "Waiting for driver to pick up" && req[0] != null) {
+                                    req[0].setDriver(driverEmail);
                                     ButtonConfirmRequest.setVisibility(View.VISIBLE);
                                     driverStatus.setText("Driver picked up request");
                                     //changeStatus(req, email, request, "accepted");
+                                    // need the app to issue a notification
+                                    showNotification();
                                 }
                             }
                         });
@@ -177,8 +182,6 @@ public class RiderRequest extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        // TODO: need the app to issue a notification
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,6 +226,7 @@ public class RiderRequest extends AppCompatActivity {
 
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
+                intent.putExtra("Driver", driverEmail);
                 startActivity(intent);
             }
         });
@@ -327,6 +331,16 @@ public class RiderRequest extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void showNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle("Request Accepted!")
+                .setContentText("Your request has been accepted by one of our driver.")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(1, builder.build());
     }
 
     public void loadLocalRequest(){

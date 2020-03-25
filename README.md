@@ -16,8 +16,8 @@
  ```
  
  ## References under author `kbojakli`
- 
- ** Alert: The `SignUpActTest` does not delete the newly added users so you must change the email before use.
+
+ *Alert: The `SignUpActTest` does not delete the newly added users so you must change the email before use.*
  
  * Database collections were created with the assistance of the Firebase tutorial:
 https://firebase.google.com/docs/firestore/manage-data/add-data#custom_objects
@@ -73,3 +73,5 @@ Answer https://stackoverflow.com/a/39179202/12826510
 * Get realtime updates with Cloud Firestore: https://firebase.google.com/docs/firestore/query-data/listen
 
 * Delete data from Cloud Firestore: https://firebase.google.com/docs/firestore/manage-data/delete-data
+
+* Create a Notification: https://developer.android.com/training/notify-user/build-notification
