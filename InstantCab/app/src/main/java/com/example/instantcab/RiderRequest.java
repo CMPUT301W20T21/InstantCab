@@ -144,11 +144,13 @@ public class RiderRequest extends AppCompatActivity {
                                 driverName = documentSnapshot.getString("username");
                                 showDriver.setText(driverName);
                                 req[0] = documentSnapshot.toObject(Request.class);
-                                req[0].setDriver(driverEmail);
                                 if (driverStatus.getText() == "Waiting for driver to pick up") {
+                                    req[0].setDriver(driverEmail);
                                     ButtonConfirmRequest.setVisibility(View.VISIBLE);
                                     driverStatus.setText("Driver picked up request");
                                     //changeStatus(req, email, request, "accepted");
+                                    // need the app to issue a notification
+                                    //showNotification();
                                 }
                             }
                         });
@@ -177,8 +179,6 @@ public class RiderRequest extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        // TODO: need the app to issue a notification
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,6 +223,7 @@ public class RiderRequest extends AppCompatActivity {
 
                 Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                 intent.putExtra("FARE", fare);
+                intent.putExtra("Driver", driverEmail);
                 startActivity(intent);
             }
         });

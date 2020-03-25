@@ -37,6 +37,7 @@ public class PaymentActivity extends AppCompatActivity {
     private TextView showFare;
     private EditText tipAmount;
     private String fare;
+    private String driverEmail;
     private float tip;
     private float total;
 
@@ -45,6 +46,7 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
         fare = getIntent().getStringExtra("FARE");
+        driverEmail = getIntent().getStringExtra("DRIVER");
         if (fare == null) fare = "10";
 
         ButtonPay = findViewById(R.id.pay);
@@ -75,6 +77,7 @@ public class PaymentActivity extends AppCompatActivity {
                 // Click to pay
                 Intent intent = new Intent(PaymentActivity.this, PayQRAct.class);
                 intent.putExtra("FARE", total);
+                intent.putExtra("Driver", driverEmail);
                 startActivity(intent);
             }
         });
