@@ -24,10 +24,10 @@
     <string name="how_was_your_experience_n_with_the_driver">How was your experience\n with the Driver?</string>
     <string name="bad">Bad</string>
     <string name="good">Good</string>
-    <string name="email_address">email_address</string>
-    <string name="phone">phone</string>
-    <string name="rating">rating</string>
-    <string name="cancel">cancel</string>
-    <string name="ok">ok</string>
+    <string name="email_address">Email Address</string>
+    <string name="phone">Phone</string>
+    <string name="rating">Rating</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
     <string name="choose_email">Choose a email send App</string>
 </resources>
