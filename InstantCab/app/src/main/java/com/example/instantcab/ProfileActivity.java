@@ -15,6 +15,7 @@
 package com.example.instantcab;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -91,20 +92,11 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 name = profile.getUsername();
                 type = profile.getType();
 
+                init();
+
             }
         });
 
-        db.collection("Rating").document(email);
-        dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Rating rating = documentSnapshot.toObject(Rating.class);
-                assert rating != null;
-                good = rating.getGood();
-                bad = rating.getBad();
-            }
-        });
-        init();
     }
 
     private void init() {
@@ -128,15 +120,31 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         if (type == "Driver") {
             num_edit.setVisibility(View.GONE);
             email_edit.setVisibility(View.GONE);
-            thumb_up.setText(String.valueOf(good));
-            thumb_down.setText(String.valueOf(bad));
             rating.setVisibility(View.VISIBLE);
             iv_call.setVisibility(View.VISIBLE);
             iv_email.setVisibility(View.VISIBLE);
+
+            DocumentReference dbDoc = db.collection("Users").document(email);
+            db.collection("Rating").document(email);
+            dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Rating rating = documentSnapshot.toObject(Rating.class);
+                    Log.i("rating", "we here");
+                    assert rating != null;
+                    good = rating.getGood();
+                    bad = rating.getBad();
+                    thumb_up.setText(String.valueOf(good));
+                    thumb_down.setText(String.valueOf(bad));
+                    Log.i("rating", "has rating");
+                }
+            });
         }
         else {
             num_edit.setVisibility(View.VISIBLE);
             email_edit.setVisibility(View.VISIBLE);
+            thumb_up.setVisibility(View.GONE);
+            thumb_down.setVisibility(View.GONE);
         }
         num.setText(phone);
         pr_email.setText(email);
