@@ -356,6 +356,12 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
             startActivity(intent);
         }
 
+        else if (id == R.id.signOut){
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

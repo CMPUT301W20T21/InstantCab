@@ -12,4 +12,9 @@
         android:orderInCategory="100"
         android:title="Profile"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/signOut"
+        android:orderInCategory="100"
+        android:title="Sign Out"
+        app:showAsAction="never" />
 </menu>
