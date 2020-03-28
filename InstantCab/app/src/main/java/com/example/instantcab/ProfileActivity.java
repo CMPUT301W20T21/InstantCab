@@ -53,7 +53,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private TextView num;
     private ImageView num_edit;
     private TextView pr_email;
-    private ImageView email_edit;
     private LinearLayout rating;
     private TextView thumb_up;
     private TextView thumb_down;
@@ -110,7 +109,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         num = findViewById(R.id.num);
         num_edit = findViewById(R.id.num_edit);
         pr_email = findViewById(R.id.pr_email);
-        email_edit = findViewById(R.id.email_edit);
         rating = findViewById(R.id.rating);
         thumb_up = findViewById(R.id.thumb_up);
         thumb_down = findViewById(R.id.thumb_down);
@@ -119,7 +117,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         if (type == "Driver") {
             num_edit.setVisibility(View.GONE);
-            email_edit.setVisibility(View.GONE);
             rating.setVisibility(View.VISIBLE);
             iv_call.setVisibility(View.VISIBLE);
             iv_email.setVisibility(View.VISIBLE);
@@ -142,7 +139,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
         else {
             num_edit.setVisibility(View.VISIBLE);
-            email_edit.setVisibility(View.VISIBLE);
+            rating.setVisibility(View.GONE);
             thumb_up.setVisibility(View.GONE);
             thumb_down.setVisibility(View.GONE);
         }
@@ -151,7 +148,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         username.setText(name);
 
         num_edit.setOnClickListener(this);
-        email_edit.setOnClickListener(this);
+        iv_call.setOnClickListener(this);
+        iv_email.setOnClickListener(this);
     }
 
     @Override
@@ -186,27 +184,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 editDialog.show(phone);
-                break;
-            /*edit user email
-            * */
-            case R.id.email_edit:
-                editDialog = new EditDialog(this);
-                editDialog.setCancelable(false);
-                editDialog.setOkClickListener(new BaseDialog.OKClickListener() {
-                    public void Ok() {
-                        email = editDialog.getEditTextString();
-                        Profile newProfile = new Profile(email,name,phone,type);
-                        db.collection("Users").document(email).set(newProfile);
-                        pr_email.setText(editDialog.getEditTextString());
-                    }
-                });
-                editDialog.setOnCancelClickListener(new BaseDialog.OnCancelClickListener() {
-                    @Override
-                    public void cancel() {
-                        editDialog.dismiss();
-                    }
-                });
-                editDialog.show(email);
                 break;
 
             /*make a call
