@@ -73,10 +73,18 @@ public class EditDialog extends BaseDialog implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_cancel:
-                mOnCancelListener.cancel();
+                hintKeyBoard();
+                dismiss();
+                if (mOnCancelListener != null) {
+                    mOnCancelListener.cancel();
+                }
                 break;
             case R.id.btn_ok:
-                mOKListener.Ok();
+                hintKeyBoard();
+                if (mOKListener != null) {
+                    mOKListener.Ok();
+                    dismiss();
+                    }
                 break;
         }
 
@@ -92,4 +100,14 @@ public class EditDialog extends BaseDialog implements View.OnClickListener {
 
         Selection.selectAll(mEditText.getText());
     }
+
+    public void hintKeyBoard() {
+        InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(imm.isActive()&&getCurrentFocus()!=null){
+            if (getCurrentFocus().getWindowToken()!=null) {
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
+    }
+
 }
