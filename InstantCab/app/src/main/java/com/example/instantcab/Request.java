@@ -30,6 +30,7 @@ public class Request {
     private String startLocationName;
     private String destinationName;
     private String driver;
+    private String driverName;
 
 
     public Request(){}
@@ -59,6 +60,7 @@ public class Request {
         this.startLocationName = startLocationName;
         this.destinationName = destinationName;
         this.driver = null;
+        this.driverName = null;
 
     }
 
@@ -140,6 +142,10 @@ public class Request {
      */
     public String getDriver() { return driver; }
 
+    public String getDriverName() {
+        return driverName;
+    }
+
     /**
      * set request status
      * @param status
@@ -154,6 +160,10 @@ public class Request {
      */
     public void setDriver(String name){
         this.driver = name;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
     }
 }
 
