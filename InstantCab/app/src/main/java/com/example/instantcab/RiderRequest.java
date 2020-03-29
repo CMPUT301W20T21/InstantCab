@@ -18,6 +18,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -78,6 +80,10 @@ public class RiderRequest extends AppCompatActivity {
     private FirebaseFirestore db;
     int indicator;
 
+
+    private String email;
+    private Request[] req = {new Request()};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,142 +98,184 @@ public class RiderRequest extends AppCompatActivity {
         starting = findViewById(R.id.start);
         destination = findViewById(R.id.end);
 
-        db = FirebaseFirestore.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final String email;
-        if (user != null) email = user.getEmail();
-        else {email = "test@email.com";}
-        final Request[] req = {new Request()};
-        CollectionReference requests = db.collection("Request");
-        final DocumentReference request = requests.document(email);
-        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                req[0] = documentSnapshot.toObject(Request.class);
-                if (req[0] == null) {
-                    // indicate that there is no request
-                    setContentView(R.layout.activity_no_request);
-                    ButtonBack = findViewById(R.id.back);
 
-                    ButtonBack.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Clicked when the rider confirms his request
-                            Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
-                            startActivity(intent);
-                        }
-                    });
-                }
-                else updateUi(req);
+        if(checkInternetConnectivity()){
+            Log.i("connectivity", "yes");
+            db = FirebaseFirestore.getInstance();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                email = user.getEmail();
             }
-        });
+            else {email = "test@email.com";}
 
-        request.addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (req[0] == null) {
-                    request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            req[0] = documentSnapshot.toObject(Request.class);
-                        }
-                    });
-                }
-                if (snapshot != null && snapshot.exists()) {
-                    driverEmail = snapshot.getString("driver");
-                    if (driverEmail != null && indicator == 0) {
-                        indicator += 1;
+            CollectionReference requests = db.collection("Request");
+            final DocumentReference request = requests.document(email);
+            request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    req[0] = documentSnapshot.toObject(Request.class);
+                    if (req[0] == null) {
+                        // indicate that there is no request
+                        setContentView(R.layout.activity_no_request);
+                        ButtonBack = findViewById(R.id.back);
 
-                        // display the driver name
-                        DocumentReference doc = db.collection("Users").document(driverEmail);
-                        doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        ButtonBack.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                driverName = documentSnapshot.getString("username");
-                                showDriver.setText(driverName);
-                                req[0] = documentSnapshot.toObject(Request.class);
-                                if (driverStatus.getText() == "Waiting for driver to pick up" && req[0] != null) {
-                                    req[0].setDriver(driverEmail);
-                                    ButtonConfirmRequest.setVisibility(View.VISIBLE);
-                                    driverStatus.setText("Driver picked up request");
-                                    //changeStatus(req, email, request, "accepted");
-                                    // need the app to issue a notification
-                                    showNotification();
-                                }
+                            public void onClick(View v) {
+                                // Clicked when the rider confirms his request
+                                Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                                startActivity(intent);
                             }
                         });
                     }
+                    else updateUi(req);
                 }
-            }
-        });
+            });
+
+            request.addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                    @Nullable FirebaseFirestoreException e) {
+                    if (req[0] == null) {
+                        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                req[0] = documentSnapshot.toObject(Request.class);
+                            }
+                        });
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        driverEmail = snapshot.getString("driver");
+                        if (driverEmail != null && indicator == 0) {
+                            indicator += 1;
+
+                            // display the driver name
+                            DocumentReference doc = db.collection("Users").document(driverEmail);
+                            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    driverName = documentSnapshot.getString("username");
+                                    showDriver.setText(driverName);
+                                    req[0] = documentSnapshot.toObject(Request.class);
+                                    if (driverStatus.getText() == "Waiting for driver to pick up" && req[0] != null) {
+                                        req[0].setDriver(driverEmail);
+                                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                                        driverStatus.setText("Driver picked up request");
+                                        //changeStatus(req, email, request, "accepted");
+                                        // need the app to issue a notification
+                                        showNotification();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
+            updateLocalRequest();
+        }
+        else{
+            Log.i("connectivity", "no");
+            loadLocalRequest();
+        }
+
+
+
+
+
+
+
+
+
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Clicked when the rider cancels the request
-                db.collection("Request").document(email)
-                        .delete()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {}
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {}
-                        });
+                if(checkInternetConnectivity()) {
+                    db = FirebaseFirestore.getInstance();
+                    db.collection("Request").document(email)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
 
-                // move back to the map activity
-                Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
-                startActivity(intent);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                }
+                            });
+                    // remove request from local data
+                    SharedPreferences preferences = getSharedPreferences("localRequest", 0);
+                    preferences.edit().remove(email).apply();
+
+                    // move back to the map activity
+                    Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
         ButtonConfirmRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Clicked when the rider confirms his request
-                driverStatus.setText("Driver is on the way");
-                ButtonPickedUp.setVisibility(View.VISIBLE);
-                ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+                if(checkInternetConnectivity()) {
+                    db = FirebaseFirestore.getInstance();
+                    // Clicked when the rider confirms his request
+                    driverStatus.setText("Driver is on the way");
+                    ButtonPickedUp.setVisibility(View.VISIBLE);
+                    ButtonConfirmRequest.setVisibility(View.INVISIBLE);
 
-                changeStatus(req, email, "confirmed");
+                    changeStatus(req, email, "confirmed");
+                }
             }
         });
 
         ButtonPickedUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Clicked when the rider meets the driver
-                driverStatus.setText("Driver picked up rider");
-                ButtonPickedUp.setVisibility(View.INVISIBLE);
-                ButtonArrive.setVisibility(View.VISIBLE);
-                ButtonCancelRequest.setVisibility(View.INVISIBLE);
+                if(checkInternetConnectivity()) {
+                    db = FirebaseFirestore.getInstance();
+                    // Clicked when the rider meets the driver
+                    driverStatus.setText("Driver picked up rider");
+                    ButtonPickedUp.setVisibility(View.INVISIBLE);
+                    ButtonArrive.setVisibility(View.VISIBLE);
+                    ButtonCancelRequest.setVisibility(View.INVISIBLE);
 
-                changeStatus(req, email, "picked up");
+                    changeStatus(req, email, "picked up");
+                }
             }
         });
 
         ButtonArrive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Clicked when the driver arrives the destination
-                // go to the payment intent
-                db.collection("Request").document(email)
-                        .delete()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {}
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {}
-                        });
+                if(checkInternetConnectivity()) {
+                    db = FirebaseFirestore.getInstance();
+                    // Clicked when the driver arrives the destination
+                    // go to the payment intent
+                    db.collection("Request").document(email)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    SharedPreferences preferences = getSharedPreferences("localRequest", 0);
+                                    preferences.edit().remove(email).apply();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                }
+                            });
 
-                Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
-                intent.putExtra("FARE", fare);
-                intent.putExtra("Driver", driverEmail);
-                startActivity(intent);
+                    Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
+                    intent.putExtra("FARE", fare);
+                    intent.putExtra("Driver", driverEmail);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -328,6 +376,8 @@ public class RiderRequest extends AppCompatActivity {
                 req[0] = documentSnapshot.toObject(Request.class);
                 req[0].setStatus(status);
                 db.collection("Request").document(email).set(req[0]);
+
+                updateLocalRequest();
             }
         });
 
@@ -353,28 +403,122 @@ public class RiderRequest extends AppCompatActivity {
         // check if there is any data
         if(request == null){
             // set text "no active request"
+            setContentView(R.layout.activity_no_request);
+            ButtonBack = findViewById(R.id.back);
+
+            ButtonBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Clicked when the rider confirms his request
+                    Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
         else{
-            // set corresponding buttons and text
+            email = request.getEmail();
+            // expect to send in the driver's name and also the fare
+            fare = request.getFare();
+            // show the fare
+            showFare.setText(fare);
+
+            // show pick-up point and destination
+            destination.setText(request.getDestinationName());
+            starting.setText(request.getStartLocationName());
+
+            driverName = request.getDriverName();
+            Log.i("load1", driverName+"here status"+request.getStatus());
+
+            if (request.getStatus() != null) {
+//                displayDriver(driverEmail);
+                Log.i("load2", driverName+"here status"+request.getStatus());
+                String a = request.getStatus();
+                switch (a) {
+                    case "accepted":
+                        driverStatus.setText("Driver picked up request");
+                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                        showDriver.setText(driverName);
+                        break;
+                    case "confirmed":
+                        driverStatus.setText("Driver is on the way");
+                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+                        ButtonPickedUp.setVisibility(View.VISIBLE);
+                        showDriver.setText(driverName);
+                        break;
+                    case "picked up":
+                        driverStatus.setText("Driver picked up rider");
+                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+                        ButtonCancelRequest.setVisibility(View.INVISIBLE);
+                        ButtonPickedUp.setVisibility(View.INVISIBLE);
+                        ButtonArrive.setVisibility(View.VISIBLE);
+                        showDriver.setText(driverName);
+                        break;
+                    case "pending":
+                        driverStatus.setText("Waiting for driver to pick up");
+                        break;
+                }
+            }
+            else{
+                Log.i("load3", driverName+"here status"+request.getStatus());
+            }
         }
     }
 
-    public void updateLocalRequest(Request request){
+    public void updateLocalRequest(){
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        if (user != null) {
+//            // User is signed in
+//            String email = user.getEmail();
+//            Log.i("have user", email);
+//
+//            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            Gson gson = new Gson();
+//            String json = gson.toJson(request);
+//            editor.putString(email, json);
+//            editor.apply();
+//        } else {
+//            // No user is signed in
+//            Log.i("does not have user", "fail");
+//        }
+
+
+        db = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            // User is signed in
-            String email = user.getEmail();
-            Log.i("have user", email);
-
-            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(request);
-            editor.putString(email, json);
-            editor.apply();
-        } else {
-            // No user is signed in
-            Log.i("does not have user", "fail");
+            email = user.getEmail();
         }
+        else {email = "test@email.com";}
+
+        CollectionReference requests = db.collection("Request");
+        final DocumentReference request = requests.document(email);
+        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                req[0] = documentSnapshot.toObject(Request.class);
+                if (req[0] == null) {
+
+                }
+                else {
+                    SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    Gson gson = new Gson();
+                    String json = gson.toJson(req[0]);
+                    editor.putString(email, json);
+                    editor.apply();
+                }
+            }
+        });
+    }
+
+    private Boolean checkInternetConnectivity(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 }
