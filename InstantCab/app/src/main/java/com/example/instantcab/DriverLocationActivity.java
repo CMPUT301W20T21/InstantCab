@@ -271,13 +271,24 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.current_request) {
+        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("accepted")) {
             Intent intent = new Intent(this, DriverAcceptRequest.class);
             startActivity(intent);
         }
 
+        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("confirmed")) {
+            Intent intent = new Intent(this, RiderConfirmRequest.class);
+            startActivity(intent);
+        }
+        
         else if (item.getItemId() == R.id.profile) {
             Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        }
+
+        else if (item.getItemId() == R.id.signOut){
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
 
