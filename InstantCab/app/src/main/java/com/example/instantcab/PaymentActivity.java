@@ -46,7 +46,7 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
         fare = getIntent().getStringExtra("FARE");
-        driverEmail = getIntent().getStringExtra("DRIVER");
+        driverEmail = getIntent().getStringExtra("Driver");
         if (fare == null) fare = "10";
 
         ButtonPay = findViewById(R.id.pay);
