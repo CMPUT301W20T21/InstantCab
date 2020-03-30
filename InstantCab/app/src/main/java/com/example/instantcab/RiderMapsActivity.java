@@ -1,10 +1,14 @@
 package com.example.instantcab;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -356,6 +360,12 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
             startActivity(intent);
         }
 
+        else if (id == R.id.signOut){
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -366,31 +376,60 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
             /*
             https://stackoverflow.com/questions/53332471/checking-if-a-document-exists-in-a-firestore-collection
              */
-            DocumentReference docIdRef = db.collection("Request").document(email);
-            docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            Log.d(TAG, "Document exists!");
-                            makeRequest.setText("You have an active request");
-                            makeRequest.setTextColor(Color.BLACK);
-                            makeRequest.setClickable(false);
+            if(checkInternetConnectivity()) {
+                DocumentReference docIdRef = db.collection("Request").document(email);
+                docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "Document exists!");
+                                makeRequest.setText("You have an active request");
+                                makeRequest.setTextColor(Color.BLACK);
+                                makeRequest.setClickable(false);
+                            } else {
+                                Log.d(TAG, "Document does not exist!");
+                                makeRequest.setHint("Make a request");
+                                makeRequest.setClickable(true);
+                            }
                         } else {
-                            Log.d(TAG, "Document does not exist!");
-                            makeRequest.setHint("Make a request");
-                            makeRequest.setClickable(true);
+                            Log.d(TAG, "Failed with: ", task.getException());
                         }
-                    } else {
-                        Log.d(TAG, "Failed with: ", task.getException());
                     }
+                });
+                Log.i("have user", email);
+            }
+            else{
+                SharedPreferences preferences = getSharedPreferences("localRequest", 0);
+                if(preferences.contains(email)){
+                    Log.d(TAG, "Document exists!");
+                    makeRequest.setText("You have an active request");
+                    makeRequest.setTextColor(Color.BLACK);
+                    makeRequest.setClickable(false);
                 }
-            });
-            Log.i("have user", email);
-        } else {
+                else{
+                    Log.d(TAG, "Document does not exist!");
+                    makeRequest.setHint("Make a request");
+                    makeRequest.setClickable(true);
+                }
+            }
+        }
+
+        else {
             // No user is signed in
             Log.i("does not have user", "fail");
         }
+    }
+
+    private Boolean checkInternetConnectivity(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 }
