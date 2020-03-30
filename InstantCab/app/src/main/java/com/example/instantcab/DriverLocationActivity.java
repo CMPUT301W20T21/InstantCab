@@ -3,9 +3,13 @@ package com.example.instantcab;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -90,7 +94,12 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 HasAcceptedRequest = documentSnapshot.get("HasAcceptedRequest", boolean.class);
             }});
 
+        // if rider has confirmed request, a notification will appear on driver side
+        if (markerRequest.getStatus().equals("confirmed")) {
+            showNotification();
+        }
 
+        // accept_request button
         btnAccept = findViewById(R.id.accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -273,6 +282,18 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showNotification() {
+        NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                // build notification
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setContentTitle("Offer accepted")
+                .setContentText("Your offer has been accepted, please pick up the rider");
+
+        // show the notification
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, builder.build());
     }
 
 }
