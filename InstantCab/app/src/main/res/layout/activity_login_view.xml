@@ -48,7 +48,7 @@
             android:layout_marginTop="36dp"
             android:ems="10"
             android:hint="Password"
-            android:inputType="textPersonName"
+            android:inputType="textPassword"
             android:textColor="@color/quantum_googblue900"
             android:textColorHint="@color/quantum_googblue900"
             app:layout_constraintStart_toStartOf="parent"

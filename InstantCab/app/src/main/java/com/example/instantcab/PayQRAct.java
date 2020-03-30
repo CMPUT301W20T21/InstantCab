@@ -19,10 +19,14 @@ package com.example.instantcab;
 
 import android.content.Intent;
 
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -36,6 +40,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
 
 import javax.annotation.Nullable;
 
@@ -54,22 +68,29 @@ public class PayQRAct extends AppCompatActivity {
     private int good = 0;
     private int bad = 0;
     private String TAG = "Updated";
+    private ImageView qrView;
+    Bitmap bitmap;
+    public final static int QRcodeWidth = 500;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private String email;
-    //private String driverEmail;
+    final Intent intent = getIntent();
+    final String email = intent.getStringExtra("Driver");
+    final String fare = intent.getStringExtra("FARE");
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstances){
         super.onCreate(savedInstances);
         setContentView(R.layout.qr_pay_activity);
 
-        /**
-         * This block needs to be changed in order to get the email of the driver rather than the rider
-         */
-        email = getDriverEmail();
-
 
         Button confirm = findViewById(R.id.paymentConfirm);
+        qrView = findViewById(R.id.QRView);
+
+        try {
+            bitmap = TextToImageEncode("I owe you: "+ fare);
+            qrView.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
 
         final RadioGroup rate = findViewById(R.id.rateGroup);
         final RadioButton goodButton = findViewById(R.id.radioGood);
@@ -77,6 +98,7 @@ public class PayQRAct extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                assert email != null;
                 DocumentReference dbDoc = db.collection("Rating").document(email);
                 dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -103,27 +125,10 @@ public class PayQRAct extends AppCompatActivity {
 
     }
 
-    public String getDriverEmail(){
-        final String[] driverEmail = new String[1];
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null){
-            email = user.getEmail();
-        }
-
-        DocumentReference dbDriver = db.collection("Request").document(email);
-        dbDriver.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Request request = documentSnapshot.toObject(Request.class);
-                assert request != null;
-                driverEmail[0] = request.getDriver();
-            }
-        });
-        return driverEmail[0];
-    }
 
     public void updateRating(int good, int bad){
         Rating newRating = new Rating(good,bad);
+        assert email != null;
         db.collection("Rating").document(email).set(newRating)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -142,6 +147,41 @@ public class PayQRAct extends AppCompatActivity {
         startActivity(new Intent(PayQRAct.this,RiderMapsActivity.class));
 
 
+    }
+
+
+    private Bitmap TextToImageEncode(String Value) throws WriterException {
+        BitMatrix bitMatrix;
+        try {
+            bitMatrix = new MultiFormatWriter().encode(
+                    Value,
+                    BarcodeFormat.DATA_MATRIX.QR_CODE,
+                    QRcodeWidth, QRcodeWidth, null
+            );
+
+        } catch (IllegalArgumentException Illegalargumentexception) {
+
+            return null;
+        }
+        int bitMatrixWidth = bitMatrix.getWidth();
+
+        int bitMatrixHeight = bitMatrix.getHeight();
+
+        int[] pixels = new int[bitMatrixWidth * bitMatrixHeight];
+
+        for (int y = 0; y < bitMatrixHeight; y++) {
+            int offset = y * bitMatrixWidth;
+
+            for (int x = 0; x < bitMatrixWidth; x++) {
+
+                pixels[offset + x] = bitMatrix.get(x, y) ?
+                        getResources().getColor(R.color.black):getResources().getColor(R.color.white);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444);
+
+        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight);
+        return bitmap;
     }
 
 }
