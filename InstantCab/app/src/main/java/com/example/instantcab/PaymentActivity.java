@@ -58,6 +58,7 @@ public class PaymentActivity extends AppCompatActivity {
         showFare.setText(fare);
         fare = fare.replace("$",""); // get rid of the dollar sign
         totalCost.setText(String.format(getString(R.string.total), Float.parseFloat(fare)));
+        total = Float.parseFloat(fare);
 
         ButtonTip.setOnClickListener(new View.OnClickListener() {
             @Override
