@@ -12,6 +12,9 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -42,8 +46,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
-
-
+/**
+ * This class is the activity driver sees after successfully logging in. It shows the map with driver's current location.
+ * Drivers can view nearby requests by clicking corresponding markers on the map.
+ * If driver clicks on accept_request button, details of the request will appear on another activity.
+ *
+ * @author peiyuan1
+ */
 public class DriverLocationActivity extends FragmentActivity implements OnMapReadyCallback {
 
     Location currentLocation;
@@ -53,11 +62,14 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     private Marker previousMarker = null;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private FirebaseUser user;
     private Button btnAccept;
     private TextView textDest;
     private TextView textFare;
     private String TAG = "Rider at this marker is: ";
     public Request markerRequest = null;
+    public static String userEmail;
+    public boolean HasAcceptedRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,22 +79,37 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         updateLocationUI();
 
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        userEmail =user.getEmail();
+        db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("Driver's Request").document(userEmail);
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                HasAcceptedRequest = documentSnapshot.get("status", boolean.class);
+            }});
+
+
         btnAccept = findViewById(R.id.accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //jump to DriverAcceptRequest Activity
-                Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
                 //if a marker was clicked before, information about the marker would be carried to new Activity
-                if (markerRequest != null) {
+                if (markerRequest != null && !HasAcceptedRequest) {
+                    HasAcceptedRequest = true;
+                    //also need to change status of firebase//
+                    
+                    Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("from", markerRequest.getStartLocationName());
                     bundle.putString("to", markerRequest.getDestinationName());
                     bundle.putString("email", markerRequest.getEmail());
                     bundle.putString("fare", markerRequest.getFare());
                     intent.putExtras(bundle);
+                    startActivity(intent);
                 }
-                startActivity(intent);
             }
         });
 
@@ -180,7 +207,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 // marker selected should not be driver's own location marker
                 if (!markerEmail.equals("Driver Location")){
                     DocumentReference docRef = db.collection("Request").document(markerEmail);
-                    docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             markerRequest = documentSnapshot.toObject(Request.class);
@@ -209,6 +236,31 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 }
                 break;
         }
+    }
+
+    /*
+    ideas from https://developer.android.com/guide/topics/ui/menus
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.current_request) {
+            Intent intent = new Intent(this, DriverAcceptRequest.class);
+            startActivity(intent);
+        }
+
+        else if (item.getItemId() == R.id.profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

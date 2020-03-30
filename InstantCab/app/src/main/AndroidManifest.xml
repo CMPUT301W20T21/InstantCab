@@ -19,8 +19,6 @@
 
         <activity android:name=".DriverLocationActivity"/>
 
-        <activity android:name=".DriverRequest" />
-
         <activity android:name=".PaymentActivity" />
 
         <activity android:name=".ProfileActivity" />
