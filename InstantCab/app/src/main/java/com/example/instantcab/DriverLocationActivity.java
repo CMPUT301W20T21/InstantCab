@@ -131,8 +131,8 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                         //double dest_lat = (double) doc.get("dest_lat");
                         //double dest_lon = (double) doc.get("dest_lon");
                         String email = (String) doc.get("email");
-                        double start_lat = doc.get("startLatitude", double.class);
-                        double start_lon = doc.get("startLongitude", double.class);
+                        Double start_lat = doc.get("startLatitude", Double.class);
+                        Double start_lon = doc.get("startLongitude", Double.class);
                         //userInfo.put("dest_lat",dest_lat);
                         //userInfo.put("dest_lon",dest_lon);
                         userInfo.put("email",email);

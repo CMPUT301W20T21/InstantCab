@@ -15,6 +15,7 @@
 package com.example.instantcab;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -52,7 +53,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private TextView num;
     private ImageView num_edit;
     private TextView pr_email;
-    private ImageView email_edit;
     private LinearLayout rating;
     private TextView thumb_up;
     private TextView thumb_down;
@@ -60,8 +60,12 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private FirebaseFirestore db;
     private int good;
     private int bad;
+    private int view;
     private String phone;
     private String email;
+    private String driverEmail;
+    private String driverPhone;
+    private String driverName;
     private String name;
     private String type;
     private ImageView iv_call;
@@ -74,6 +78,12 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         setContentView(R.layout.activity_user);
+
+
+        driverEmail = getIntent().getStringExtra("DRIVER");
+        if (driverEmail != null) {
+            view = 1;
+        }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null){
@@ -91,25 +101,16 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 name = profile.getUsername();
                 type = profile.getType();
 
+                init();
+
             }
         });
 
-        db.collection("Rating").document(email);
-        dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Rating rating = documentSnapshot.toObject(Rating.class);
-                assert rating != null;
-                good = rating.getGood();
-                bad = rating.getBad();
-            }
-        });
-        init();
     }
 
     private void init() {
         toolbar = findViewById(R.id.toolbar_activity_info);
-//        setSupportActionBar(toolbar);
+        //     setSupportActionBar(toolbar);
 //        getSupportActionBar().setHomeButtonEnabled(true);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -118,32 +119,85 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         num = findViewById(R.id.num);
         num_edit = findViewById(R.id.num_edit);
         pr_email = findViewById(R.id.pr_email);
-        email_edit = findViewById(R.id.email_edit);
         rating = findViewById(R.id.rating);
         thumb_up = findViewById(R.id.thumb_up);
         thumb_down = findViewById(R.id.thumb_down);
         iv_email = findViewById(R.id.iv_email);
         iv_call = findViewById(R.id.iv_call);
+        if (view != 1) {
+            if (type == "Driver") {
+                num_edit.setVisibility(View.VISIBLE);
+                rating.setVisibility(View.VISIBLE);
 
-        if (type == "Driver") {
-            num_edit.setVisibility(View.GONE);
-            email_edit.setVisibility(View.GONE);
-            thumb_up.setText(String.valueOf(good));
-            thumb_down.setText(String.valueOf(bad));
+                DocumentReference dbDoc = db.collection("Users").document(email);
+                db.collection("Rating").document(email);
+                dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Rating rating = documentSnapshot.toObject(Rating.class);
+                        Log.i("rating", "we here");
+                        assert rating != null;
+                        good = rating.getGood();
+                        bad = rating.getBad();
+                        thumb_up.setText(String.valueOf(good));
+                        thumb_down.setText(String.valueOf(bad));
+                        Log.i("rating", "has rating");
+                    }
+                });
+            } else {
+                num_edit.setVisibility(View.VISIBLE);
+                rating.setVisibility(View.GONE);
+                thumb_up.setVisibility(View.GONE);
+                thumb_down.setVisibility(View.GONE);
+            }
+            num.setText(phone);
+            pr_email.setText(email);
+            username.setText(name);
+
+            num_edit.setOnClickListener(this);
+
+        } else{
+            DocumentReference dbDoc = db.collection("Users").document(driverEmail);
+            dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Profile profile = documentSnapshot.toObject(Profile.class);
+                    Log.i("users", "we here");
+                    assert profile != null;
+                    driverPhone = profile.getPhone();
+                    driverEmail = profile.getEmail();
+                    driverName = profile.getUsername();
+                    type = profile.getType();
+                    Log.i("users", "has users");
+                }
+            });
+
+            DocumentReference Doc = db.collection("Users").document(driverEmail);
+            db.collection("Rating").document(driverEmail);
+            Doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Rating rating = documentSnapshot.toObject(Rating.class);
+                    Log.i("rating", "we here");
+                    assert rating != null;
+                    good = rating.getGood();
+                    bad = rating.getBad();
+                    thumb_up.setText(String.valueOf(good));
+                    thumb_down.setText(String.valueOf(bad));
+                    Log.i("rating", "has rating");
+                }
+            });
             rating.setVisibility(View.VISIBLE);
             iv_call.setVisibility(View.VISIBLE);
             iv_email.setVisibility(View.VISIBLE);
-        }
-        else {
-            num_edit.setVisibility(View.VISIBLE);
-            email_edit.setVisibility(View.VISIBLE);
-        }
-        num.setText(phone);
-        pr_email.setText(email);
-        username.setText(name);
 
-        num_edit.setOnClickListener(this);
-        email_edit.setOnClickListener(this);
+            num.setText(driverPhone);
+            pr_email.setText(driverEmail);
+            username.setText(driverName);
+
+            iv_call.setOnClickListener(this);
+            iv_email.setOnClickListener(this);
+        }
     }
 
     @Override
@@ -178,27 +232,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 editDialog.show(phone);
-                break;
-            /*edit user email
-            * */
-            case R.id.email_edit:
-                editDialog = new EditDialog(this);
-                editDialog.setCancelable(false);
-                editDialog.setOkClickListener(new BaseDialog.OKClickListener() {
-                    public void Ok() {
-                        email = editDialog.getEditTextString();
-                        Profile newProfile = new Profile(email,name,phone,type);
-                        db.collection("Users").document(email).set(newProfile);
-                        pr_email.setText(editDialog.getEditTextString());
-                    }
-                });
-                editDialog.setOnCancelClickListener(new BaseDialog.OnCancelClickListener() {
-                    @Override
-                    public void cancel() {
-                        editDialog.dismiss();
-                    }
-                });
-                editDialog.show(email);
                 break;
 
             /*make a call
