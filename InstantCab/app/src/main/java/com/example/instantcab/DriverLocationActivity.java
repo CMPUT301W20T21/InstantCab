@@ -87,7 +87,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                HasAcceptedRequest = documentSnapshot.get("status", boolean.class);
+                HasAcceptedRequest = documentSnapshot.get("HasAcceptedRequest", boolean.class);
             }});
 
 
@@ -100,15 +100,27 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 if (markerRequest != null && !HasAcceptedRequest) {
                     HasAcceptedRequest = true;
                     //also need to change status of firebase//
-                    
-                    Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
+
                     Bundle bundle = new Bundle();
                     bundle.putString("from", markerRequest.getStartLocationName());
                     bundle.putString("to", markerRequest.getDestinationName());
                     bundle.putString("email", markerRequest.getEmail());
                     bundle.putString("fare", markerRequest.getFare());
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                    //jump to different layouts based on request status
+                    if (markerRequest.getStatus().equals("accepted")) {
+                        Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
+                        intent.putExtras(bundle);
+                        startActivity(intent);}
+                    else if (markerRequest.getStatus().equals("confirmed")) {
+                        Intent intent = new Intent(DriverLocationActivity.this, RiderConfirmRequest.class);
+                        intent.putExtras(bundle);
+                        startActivity(intent);}
+                    else {
+                        markerRequest.setStatus("accepted");
+                        markerRequest.setDriver(userEmail);
+                        Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
+                        intent.putExtras(bundle);
+                        startActivity(intent);}
                 }
             }
         });
