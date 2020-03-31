@@ -159,7 +159,7 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
                     saveLocalRequest(markerRequest);
 
                     //jump to different layouts based on request status
-                    if (markerRequest.getStatus().equals("accepted")) {\
+                    if (markerRequest.getStatus().equals("accepted")) {
                         Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
                         intent.putExtras(bundle);
                         startActivity(intent);}
@@ -376,16 +376,20 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
             });
         }
 
-        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("accepted")) {
-            Intent intent = new Intent(this, DriverAcceptRequest.class);
-            startActivity(intent);
-        }
+        if (markerRequest != null) {
+            if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("accepted")) {
+                Intent intent = new Intent(this, DriverAcceptRequest.class);
+                startActivity(intent);
+            }
 
-        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("confirmed")) {
-            Intent intent = new Intent(this, RiderConfirmRequest.class);
-            startActivity(intent);
+            if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("confirmed")) {
+                Intent intent = new Intent(this, RiderConfirmRequest.class);
+                startActivity(intent);
+            }
         }
-
+        if (markerRequest == null && item.getItemId() == R.id.current_request) {
+            Log.d("Error", "You don't have active request");
+        }
         else if (item.getItemId() == R.id.profile) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
