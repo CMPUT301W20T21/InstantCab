@@ -42,7 +42,7 @@ import androidx.appcompat.widget.Toolbar;
  * @author hgou
  */
 
-public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class DriverProfile extends AppCompatActivity implements View.OnClickListener {
     private Toolbar toolbar;
     private EditDialog editDialog;
 
@@ -102,35 +102,24 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         rating = findViewById(R.id.rating);
         thumb_up = findViewById(R.id.thumb_up);
         thumb_down = findViewById(R.id.thumb_down);
-        if (type == "Driver") {
-            DocumentReference dbDoc = db.collection("Users").document(email);
-            db.collection("Rating").document(email);
-            dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+        DocumentReference dbDoc = db.collection("Rating").document(email);
+        dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Rating rating = documentSnapshot.toObject(Rating.class);
-                Log.i("rating", "we here");
                 assert rating != null;
                 good = rating.getGood();
                 bad = rating.getBad();
-                thumb_up.setText(String.valueOf(good));
-                thumb_down.setText(String.valueOf(bad));
-                Log.i("rating", "has rating");
                 }
             });
-            rating.setVisibility(View.VISIBLE);
-            thumb_up.setVisibility(View.VISIBLE);
-            thumb_down.setVisibility(View.VISIBLE);
-        } else{
-            rating.setVisibility(View.GONE);
-            thumb_up.setVisibility(View.GONE);
-            thumb_down.setVisibility(View.GONE);
-        }
+        thumb_up.setText(String.valueOf(good));
+        thumb_down.setText(String.valueOf(bad));
+        rating.setVisibility(View.VISIBLE);
         num_edit.setVisibility(View.VISIBLE);
         num.setText(phone);
         pr_email.setText(email);
         username.setText(name);
-
         num_edit.setOnClickListener(this);
     }
 
