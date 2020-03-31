@@ -72,15 +72,18 @@ public class PayQRAct extends AppCompatActivity {
     Bitmap bitmap;
     public final static int QRcodeWidth = 500;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    final Intent intent = getIntent();
-    final String email = intent.getStringExtra("Driver");
-    final String fare = intent.getStringExtra("FARE");
+    private Intent intent;
+    private String email;
+    private String fare;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstances){
         super.onCreate(savedInstances);
         setContentView(R.layout.qr_pay_activity);
 
+        intent = getIntent();
+        email = intent.getStringExtra("Driver");
+        fare = intent.getStringExtra("FARE");
 
         Button confirm = findViewById(R.id.paymentConfirm);
         qrView = findViewById(R.id.QRView);
