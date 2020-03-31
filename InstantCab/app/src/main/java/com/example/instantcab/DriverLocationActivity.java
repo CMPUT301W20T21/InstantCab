@@ -391,7 +391,7 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
             Log.d("Error", "You don't have active request");
         }
         else if (item.getItemId() == R.id.profile) {
-            Intent intent = new Intent(this, ProfileActivity.class);
+            Intent intent = new Intent(this, DriverProfile.class);
             startActivity(intent);
         }
 
