@@ -108,19 +108,17 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_location);
+
+        getLocationPermission();
+
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.google_map);
         mapFragment.getMapAsync(this);
 
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
@@ -362,14 +360,20 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
         mMap = googleMap;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
         //add markers into map
         retrieveData();
         //display driver's current position
-        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Driver Location");
-        mMap.addCircle(new CircleOptions().center(latLng).radius(20).strokeColor(Color.RED).fillColor(Color.BLUE));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-        mMap.addMarker(markerOptions);
+//        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+//        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Driver Location");
+//        mMap.addCircle(new CircleOptions().center(latLng).radius(20).strokeColor(Color.RED).fillColor(Color.BLUE));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+//        mMap.addMarker(markerOptions);
         //click on marker event
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
