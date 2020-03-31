@@ -11,6 +11,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -42,13 +43,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,6 +126,9 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                     bundle.putString("to", markerRequest.getDestinationName());
                     bundle.putString("email", markerRequest.getEmail());
                     bundle.putString("fare", markerRequest.getFare());
+
+                    saveLocalRequest(markerRequest);
+
                     //jump to different layouts based on request status
                     if (markerRequest.getStatus().equals("accepted")) {
                         Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
@@ -369,6 +377,145 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         // show the notification
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, builder.build());
+    }
+
+    private void loadLocalRequest(){
+        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(RiderMapsActivity.userEmail, "");
+        Type type = new TypeToken<Request>() {}.getType();
+        Request request = gson.fromJson(json, type);
+
+        // check if there is any data
+        if(request == null){
+            // set text "no active request"
+            setContentView(R.layout.activity_no_request);
+            ButtonBack = findViewById(R.id.back);
+
+            ButtonBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Clicked when the rider confirms his request
+                    setContentView(R.layout.activity_driver_location);
+                }
+            });
+        }
+        else{
+            String email = request.getEmail();
+            // expect to send in the driver's name and also the fare
+            String fare = request.getFare();
+            // show the fare
+
+            // show pick-up point and destination
+            String destinationName = request.getDestinationName();
+            String startLocationName = request.getStartLocationName();
+
+            String driverName = request.getDriverName();
+            Log.i("load1", driverName+"here status"+request.getStatus());
+
+            if (request.getStatus() != null) {
+//                displayDriver(driverEmail);
+                Log.i("load2", driverName+"here status"+request.getStatus());
+                String a = request.getStatus();
+                switch (a) {
+                    case "accepted":
+                        Intent intent1 = new Intent(this, DriverAcceptRequest.class);
+                        Bundle bundle1 = new Bundle();
+                        bundle1.putString("from", startLocationName);
+                        bundle1.putString("to", destinationName);
+                        bundle1.putString("email", email);
+                        bundle1.putString("fare", fare);
+                        intent1.putExtras(bundle1);
+                        startActivity(intent1);
+                        break;
+                    case "confirmed":
+                        Intent intent2 = new Intent(this, RiderConfirmRequest.class);
+                        Bundle bundle2 = new Bundle();
+                        bundle2.putString("from", startLocationName);
+                        bundle2.putString("to", destinationName);
+                        bundle2.putString("email", email);
+                        bundle2.putString("fare", fare);
+                        intent2.putExtras(bundle2);
+                        startActivity(intent2);
+                        break;
+//                    case "picked up":
+//                        driverStatus.setText("Driver picked up rider");
+//                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
+//                        ButtonCancelRequest.setVisibility(View.INVISIBLE);
+//                        ButtonPickedUp.setVisibility(View.INVISIBLE);
+//                        ButtonArrive.setVisibility(View.VISIBLE);
+//                        showDriver.setText(driverName);
+//                        break;
+//                    case "pending":
+//                        driverStatus.setText("Waiting for driver to pick up");
+//                        break;
+                }
+            }
+            else{
+                Log.i("load3", driverName+"here status"+request.getStatus());
+            }
+        }
+    }
+
+    public void saveLocalRequest(Request request){
+        if (userEmail != null) {
+            // User is signed in
+            Log.i("have user", userEmail);
+
+            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(request);
+            editor.putString(userEmail, json);
+            editor.apply();
+        } else {
+            // No user is signed in
+            Log.i("does not have user", "fail");
+        }
+    }
+
+    public void updateLocalRequest(){
+        db = FirebaseFirestore.getInstance();
+        final String driverEmail;
+        final String[] riderEmail = new String[1];
+        final Request[] req = new Request[1];
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            driverEmail = user.getEmail();
+        }
+        else {driverEmail = "test@email.com";}
+
+        CollectionReference driverRequests = db.collection("Driver's Request");
+        final DocumentReference driverRequest = driverRequests.document(driverEmail);
+        driverRequest.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                riderEmail[0] = documentSnapshot.get("riderEmail", String.class);
+
+                CollectionReference requests = db.collection("Request");
+                final DocumentReference request = requests.document(riderEmail[0]);
+                request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        req[0] = documentSnapshot.toObject(Request.class);
+                        if (req[0] == null) {
+
+                        }
+                        else {
+                            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            Gson gson = new Gson();
+                            String json = gson.toJson(req[0]);
+                            editor.putString(driverEmail, json);
+                            editor.apply();
+                        }
+                    }
+                });
+            }
+        });
+
+
     }
 
 }
