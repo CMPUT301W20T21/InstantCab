@@ -42,12 +42,18 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,18 +98,32 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         userEmail =user.getEmail();
         db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("Driver's Request").document(userEmail);
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                HasAcceptedRequest = documentSnapshot.get("HasAcceptedRequest", boolean.class);
-            }});
 
-        // if rider has confirmed request, a notification will appear on driver side
-        if (markerRequest != null) {
-            if (markerRequest.getStatus().equals("confirmed")) {
-                showNotification();
+        // check if driver has accepted a request
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+        ref.child(userEmail).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // user already exists in db, button accept cannot be clicked
+                    btnAccept = findViewById(R.id.accept_request);
+                    btnAccept.setClickable(false);
+                    HasAcceptedRequest = true;
+                } else {
+                    // Update one field, creating the document if it does not already exist.
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("email", userEmail);
+                    HasAcceptedRequest = false;
+                    db.collection("Driver's Request").document(userEmail)
+                            .set(data, SetOptions.merge());
+                }
             }
-        }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         // accept_request button
         btnAccept = findViewById(R.id.accept_request);
@@ -114,7 +134,6 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 //if a marker was clicked before, information about the marker would be carried to new Activity
                 if (markerRequest != null && !HasAcceptedRequest) {
                     HasAcceptedRequest = true;
-                    //also need to change status of firebase//
 
                     Bundle bundle = new Bundle();
                     bundle.putString("from", markerRequest.getStartLocationName());
@@ -140,14 +159,23 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
             }
         });
 
+        // if rider has confirmed request, a notification will appear on driver side
+        if (markerRequest != null) {
+            if (markerRequest.getStatus().equals("confirmed")) {
+                showNotification();
+            }
+        }
+
+        updateUI();
+
     }
 
-    private Map<String, Object> retrieveData() {
+    private void retrieveData() {
         // connect to firebase and load neighbouring markers
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        final Map<String, Object> userInfo = new HashMap<>();
+        //final Map<String, Object> userInfo = new HashMap<>();
         db.collection("Request").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -162,16 +190,16 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                         Double start_lon = doc.get("startLongitude", Double.class);
                         //userInfo.put("dest_lat",dest_lat);
                         //userInfo.put("dest_lon",dest_lon);
-                        userInfo.put("email",email);
-                        userInfo.put("start_lat",start_lat);
-                        userInfo.put("start_lon",start_lon);
+                        //userInfo.put("email",email);
+                        //userInfo.put("start_lat",start_lat);
+                        //userInfo.put("start_lon",start_lon);
                         createMarker(start_lat, start_lon, email);
                     }
                 }
             }
         });
         //Log.i("info", userInfo.);
-        return userInfo;
+        return;
     }
 
     private void updateLocationUI() {
@@ -197,8 +225,6 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 }
             }
         });
-
-        updateUI();
 
     }
 
