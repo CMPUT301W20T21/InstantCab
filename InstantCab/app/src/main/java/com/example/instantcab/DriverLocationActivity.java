@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
@@ -71,6 +72,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import static com.example.instantcab.RiderMapsActivity.DEFAULT_LOCATION;
+import static com.example.instantcab.RiderMapsActivity.DEFAULT_ZOOM;
+
 /**
  * This class is the activity driver sees after successfully logging in. It shows the map with driver's current location.
  * Drivers can view nearby requests by clicking corresponding markers on the map.
@@ -81,9 +85,12 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 public class DriverLocationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     Location currentLocation;
-    FusedLocationProviderClient fusedLocationProviderClient;
+    FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
+    private boolean mLocationPermissionGranted;
+    public Location mLastKnownLocation;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0x0011;
     private Marker previousMarker = null;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -102,8 +109,18 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_location);
         // Construct a FusedLocationProviderClient.
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
@@ -220,30 +237,78 @@ public class DriverLocationActivity extends AppCompatActivity implements OnMapRe
         return;
     }
 
-    private void updateLocationUI() {
-        /*get driver's current location if permission is granted by user;
-        otherwise, no action.
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
          */
-        if (ActivityCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]
-                    {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-            return;}
-        Task<Location> task = fusedLocationProviderClient.getLastLocation();
-        task.addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocation = location;
-                    //Log.i("current location",Double.toString(location.getLatitude()));
-                    //Toast.makeText(getApplicationContext(), currentLocation.getLatitude()
-                    //        +""+currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
-                    SupportMapFragment supportMapFragment = (SupportMapFragment)
-                            getSupportFragmentManager().findFragmentById(R.id.google_map);
-                    supportMapFragment.getMapAsync(DriverLocationActivity.this);
-                }
-            }
-        });
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
 
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                mLastKnownLocation = null;
+                getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (mLocationPermissionGranted) {
+                Task locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = (Location) task.getResult();
+                            if(mLastKnownLocation == null){
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        DEFAULT_LOCATION, DEFAULT_ZOOM));
+                                Log.i("no location", "no location accquired");
+                            }
+                            else {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch(SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
     }
 
     public  void updateUI() {
