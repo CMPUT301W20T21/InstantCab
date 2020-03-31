@@ -71,6 +71,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     private FirebaseFirestore db;
     private FirebaseUser user;
     private Button btnAccept;
+    private Button ButtonBack;
     private TextView textDest;
     private TextView textFare;
     private String TAG = "Rider at this marker is: ";
@@ -320,6 +321,20 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.current_request && markerRequest == null) {
+            setContentView(R.layout.activity_no_request);
+            ButtonBack = findViewById(R.id.back);
+
+            ButtonBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Clicked when the rider confirms his request
+                    Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
         if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("accepted")) {
             Intent intent = new Intent(this, DriverAcceptRequest.class);
             startActivity(intent);
