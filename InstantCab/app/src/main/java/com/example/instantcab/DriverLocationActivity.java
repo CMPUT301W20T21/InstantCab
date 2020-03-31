@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -35,6 +37,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -95,8 +98,10 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
             }});
 
         // if rider has confirmed request, a notification will appear on driver side
-        if (markerRequest.getStatus().equals("confirmed")) {
-            showNotification();
+        if (markerRequest != null) {
+            if (markerRequest.getStatus().equals("confirmed")) {
+                showNotification();
+            }
         }
 
         // accept_request button
@@ -191,6 +196,50 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                 }
             }
         });
+
+        updateUI();
+
+    }
+
+    public  void updateUI() {
+        if (user != null) {
+            String email = user.getEmail();
+
+            if (checkInternetConnectivity()) {
+                DocumentReference docIdRef = db.collection("Driver's Request").document(email);
+                docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists() && !document.get("HasAcceptedRequest", boolean.class)) {
+                                Log.d(TAG, "You may accept a request!");
+                                btnAccept.setClickable(true);
+                            } else if (document.exists() && document.get("HasAcceptedRequest", boolean.class)) {
+                                Log.d(TAG, "You already accept a request!");
+                                btnAccept.setClickable(false);
+                            } else {
+                                Log.d(TAG, "Failed with: ", task.getException());
+                            }
+                        } else {
+                            Log.d(TAG, "Failed with: ", task.getException());
+                        }
+                    }
+                });
+                Log.i("have user", email);
+            }
+        }
+    }
+
+    private Boolean checkInternetConnectivity(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 
     private void createMarker (double dest_lat, double dest_lon, String email) {
@@ -280,7 +329,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
             Intent intent = new Intent(this, RiderConfirmRequest.class);
             startActivity(intent);
         }
-        
+
         else if (item.getItemId() == R.id.profile) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);

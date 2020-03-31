@@ -240,7 +240,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
-    /**
+    /**u'p
      * get location permission from user
      */
     private void getLocationPermission() {
