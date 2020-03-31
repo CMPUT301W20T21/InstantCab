@@ -155,7 +155,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                     saveLocalRequest(markerRequest);
 
                     //jump to different layouts based on request status
-                    if (markerRequest.getStatus().equals("accepted")) {
+                    if (markerRequest.getStatus().equals("accepted")) {\
                         Intent intent = new Intent(DriverLocationActivity.this, DriverAcceptRequest.class);
                         intent.putExtras(bundle);
                         startActivity(intent);}
