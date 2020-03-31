@@ -81,7 +81,7 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
  *
  * @author peiyuan1
  */
-public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     private Location currentLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -102,10 +102,14 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
     private TextView textDest;
     private TextView textFare;
     private TextView textStart;
+    private TextView titleStart;
+    private TextView titleDest;
+    private TextView titleFare;
 
     private String TAG = "Rider at this marker is: ";
     public Request markerRequest = null;
     public static String driverEmail;
+    public String driverName;
     public boolean HasAcceptedRequest;
 
     public Geocoder geocoder;
@@ -117,6 +121,8 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
 
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0x0011;
+
+    private Marker order;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,11 +136,28 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
         driverEmail =user.getEmail();
         db = FirebaseFirestore.getInstance();
 
+        CollectionReference requests = db.collection("Users");
+        final DocumentReference request = requests.document(driverEmail);
+        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Profile driver = documentSnapshot.toObject(Profile.class);
+                if (driver == null) {
+                }
+                else{
+                    driverName = driver.getUsername();
+                }
+            }
+        });
+
         geocoder = new Geocoder(DriverHomeActivity.this, Locale.getDefault());
 
         textDest = findViewById(R.id.destination);
         textFare = findViewById(R.id.fare);
         textStart = findViewById(R.id.start);
+        titleDest = findViewById(R.id.titleDest);
+        titleStart = findViewById(R.id.titleStart);
+        titleFare = findViewById(R.id.titleFare);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -144,7 +167,7 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        updateUI();
+//        updateUI();
 
         // accept_request button
         btnAccept = findViewById(R.id.accept_request);
@@ -163,6 +186,12 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                         db = FirebaseFirestore.getInstance();
 
                         db.collection("DriverRequest").document(email).set(tmpRequest);
+
+                        tmpRequest.setStatus("accepted");
+                        tmpRequest.setDriver(driverEmail);
+                        tmpRequest.setDriverName(driverName);
+
+                        db.collection("Request").document(tmpRequest.getEmail()).set(tmpRequest);
 
                         saveLocalRequest(tmpRequest);
 
@@ -204,6 +233,9 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                         if(status.equals("pending")) {
                             createMarker(start_lat, start_lon, email);
                         }
+                        else{
+                            Log.i("driver home", email+"here");
+                        }
                     }
                 }
             }
@@ -244,9 +276,26 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                             if (document.exists()) {
                                 Log.d(TAG, "You already accept a request!");
                                 btnAccept.setVisibility(View.GONE);
+                                titleStart.setText("You have an active request");
+                                titleDest.setVisibility(View.GONE);
+                                titleFare.setVisibility(View.GONE);
+                                textDest.setVisibility(View.GONE);
+                                textFare.setVisibility(View.GONE);
+                                textStart.setVisibility(View.GONE);
+
+                                Request request = document.toObject(Request.class);
+
+                                if(request == null){
+
+                                }
+                                else{
+                                    LatLng start = new LatLng(request.getStartLatitude(), request.getStartLongitude());
+                                    order = mMap.addMarker(new MarkerOptions().title("pick up").position(start));
+                                }
                             }
                             else {
                                 Log.d(TAG, "Failed with: ", task.getException());
+                                retrieveData();
                                 btnAccept.setVisibility(View.VISIBLE);
                             }
                         }
@@ -300,7 +349,7 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-        mMap.setOnMapClickListener((GoogleMap.OnMapClickListener) this);
+        mMap.setOnMapClickListener(this);
 
         if(mMap == null){
         }
@@ -309,8 +358,7 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
             mMap.getUiSettings().setZoomControlsEnabled(true);
         }
 
-        //add markers into map
-        retrieveData();
+        updateUI();
 
         //click on marker event
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -324,7 +372,10 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                 // click marker should edit textView below.
                 String markerEmail = marker.getTitle();
                 // marker selected should not be driver's own location marker
-                if (!markerEmail.equals("Driver Location")){
+                if(marker.getTitle().equals("pick up")){
+                    return true;
+                }
+                else if (!markerEmail.equals("Driver Location")){
                     DocumentReference docRef = db.collection("Request").document(markerEmail);
                     docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
@@ -382,13 +433,8 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
 //            });
 //        }
 
-        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("accepted")) {
-            Intent intent = new Intent(this, DriverAcceptRequest.class);
-            startActivity(intent);
-        }
-
-        if (item.getItemId() == R.id.current_request && markerRequest.getStatus().equals("confirmed")) {
-            Intent intent = new Intent(this, RiderConfirmRequest.class);
+        if (item.getItemId() == R.id.current_request) {
+            Intent intent = new Intent(this, DriverRequest.class);
             startActivity(intent);
         }
 
@@ -617,4 +663,8 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
 }

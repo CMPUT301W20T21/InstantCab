@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".DriverHomeActivity">
+    android:layout_height="match_parent">
 
-    <fragment
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/google_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="344dp" />
+        android:layout_height="344dp"
+        tools:context=".DriverHomeActivity"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,13 +20,14 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="152dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_height="match_parent">
+            android:orientation="vertical">
 
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/titleStart"
+                android:layout_width="249dp"
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingTop="10dp"
@@ -40,41 +41,46 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingTop="10dp"
+                android:singleLine="true"
                 android:textSize="20dp" />
 
             <TextView
+                android:id="@+id/titleDest"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp"
                 android:paddingLeft="10dp"
-                android:textStyle="bold"
+                android:paddingTop="10dp"
+                android:text="Destination"
                 android:textSize="25dp"
-                android:text="Destination"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/destination"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp"
                 android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:singleLine="true"
                 android:textSize="20dp" />
 
             <TextView
+                android:id="@+id/titleFare"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp"
                 android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:text="Fare"
                 android:textSize="25dp"
-                android:textStyle="bold"
-                android:text="Fare"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/fare"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp"
                 android:paddingLeft="10dp"
-                android:textSize="20dp"/>
+                android:paddingTop="10dp"
+                android:singleLine="true"
+                android:textSize="20dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -91,11 +97,7 @@
                 android:layout_gravity="center_horizontal"
                 android:background="#C12D2D38"
                 android:text="Accept Request"
-                android:textSize="18dp"
-                tools:layout_conversion_absoluteHeight="24dp"
-                tools:layout_conversion_absoluteWidth="126dp"
-                tools:layout_editor_absoluteX="245dp"
-                tools:layout_editor_absoluteY="500dp">
+                android:textSize="16dp">
 
             </Button>
 
