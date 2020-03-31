@@ -2,6 +2,7 @@ package com.example.instantcab;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -43,27 +44,27 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-<<<<<<< HEAD
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-=======
+
 import com.google.firebase.firestore.CollectionReference;
->>>>>>> 1dde0736ae20523fc3e1857f36ed6fadfcc7ed67
+
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-<<<<<<< HEAD
+
 import com.google.firebase.firestore.SetOptions;
-=======
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
->>>>>>> 1dde0736ae20523fc3e1857f36ed6fadfcc7ed67
+
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
  *
  * @author peiyuan1
  */
-public class DriverLocationActivity extends FragmentActivity implements OnMapReadyCallback {
+public class DriverLocationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -111,28 +112,31 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         DocumentReference docRef = db.collection("Driver's Request").document(userEmail);
 
         // check if driver has accepted a request
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-        ref.child(userEmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        DocumentReference docIdRef = db.collection("Driver's Request").document(userEmail);
+        docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    // user already exists in db, button accept cannot be clicked
-                    btnAccept = findViewById(R.id.accept_request);
-                    btnAccept.setClickable(false);
-                    HasAcceptedRequest = true;
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "Document exists!");
+                        // user already exists in db, button accept cannot be clicked
+                        btnAccept = findViewById(R.id.accept_request);
+                        btnAccept.setClickable(false);
+                        HasAcceptedRequest = true;
+
+                    } else {
+                        Log.d(TAG, "Document does not exist!");
+                        // Update one field, creating the document if it does not already exist.
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("email", userEmail);
+                        HasAcceptedRequest = false;
+                        db.collection("Driver's Request").document(userEmail)
+                                .set(data, SetOptions.merge());
+                    }
                 } else {
-                    // Update one field, creating the document if it does not already exist.
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("email", userEmail);
-                    HasAcceptedRequest = false;
-                    db.collection("Driver's Request").document(userEmail)
-                            .set(data, SetOptions.merge());
+                    Log.d(TAG, "Failed with: ", task.getException());
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
 
@@ -253,10 +257,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
-                            if (document.exists() && !document.get("HasAcceptedRequest", boolean.class)) {
-                                Log.d(TAG, "You may accept a request!");
-                                btnAccept.setClickable(true);
-                            } else if (document.exists() && document.get("HasAcceptedRequest", boolean.class)) {
+                            if (document.exists()) {
                                 Log.d(TAG, "You already accept a request!");
                                 btnAccept.setClickable(false);
                             } else {
@@ -355,7 +356,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_driver, menu);
         return true;
     }
 
@@ -393,6 +394,10 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         else if (item.getItemId() == R.id.signOut){
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+        else if(item.getItemId() == R.id.scan){
+            Intent intent = new Intent(this, ScanQR.class);
             startActivity(intent);
         }
 
