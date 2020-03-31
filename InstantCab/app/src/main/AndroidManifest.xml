@@ -70,6 +70,14 @@
                 android:value=".RiderMapsActivity" />
         </activity>
 
+        <activity android:name=".DriverActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".RiderRequest">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".RiderRequest" />
+        </activity>
+
         <activity
             android:name=".RiderMapsActivity"
 
