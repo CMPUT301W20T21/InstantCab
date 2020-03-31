@@ -42,10 +42,11 @@ import androidx.appcompat.widget.Toolbar;
  * @author hgou
  */
 
-public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class DriverActivity extends AppCompatActivity implements View.OnClickListener {
     private Toolbar toolbar;
-    private EditDialog editDialog;
+    private OKCancelDialog okCancelDialog;
 
+    private ImageView user;
     private TextView username;
     private TextView num;
     private ImageView num_edit;
@@ -61,6 +62,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private String email;
     private String name;
     private String type;
+    private ImageView iv_call;
+    private ImageView iv_email;
+    private String TAG = "Email Password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,31 +74,30 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_user);
 
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null){
-            email = user.getEmail();
+        email = getIntent().getStringExtra("DRIVER");
+        if (email != null) {
+            DocumentReference dbDoc = db.collection("Users").document(email);
+            dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Profile profile = documentSnapshot.toObject(Profile.class);
+                    assert profile != null;
+                    phone = profile.getPhone();
+                    email = profile.getEmail();
+                    name = profile.getUsername();
+                    type = profile.getType();
+
+                    init();
+
+                }
+            });
         }
-
-        DocumentReference dbDoc = db.collection("Users").document(email);
-        dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Profile profile = documentSnapshot.toObject(Profile.class);
-                assert profile != null;
-                phone = profile.getPhone();
-                email = profile.getEmail();
-                name = profile.getUsername();
-                type = profile.getType();
-
-                init();
-
-            }
-        });
 
     }
 
     private void init() {
         toolbar = findViewById(R.id.toolbar_activity_info);
+        user= findViewById(R.id.user);
         username = findViewById(R.id.username);
         num = findViewById(R.id.num);
         num_edit = findViewById(R.id.num_edit);
@@ -102,12 +105,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         rating = findViewById(R.id.rating);
         thumb_up = findViewById(R.id.thumb_up);
         thumb_down = findViewById(R.id.thumb_down);
+        iv_email = findViewById(R.id.iv_email);
+        iv_call = findViewById(R.id.iv_call);
         if (type == "Driver") {
             DocumentReference dbDoc = db.collection("Users").document(email);
             db.collection("Rating").document(email);
             dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Rating rating = documentSnapshot.toObject(Rating.class);
                 Log.i("rating", "we here");
                 assert rating != null;
@@ -119,17 +124,20 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
             rating.setVisibility(View.VISIBLE);
-        } else{
-            rating.setVisibility(View.GONE);
-            thumb_up.setVisibility(View.GONE);
-            thumb_down.setVisibility(View.GONE);
-        }
-        num_edit.setVisibility(View.VISIBLE);
-        num.setText(phone);
-        pr_email.setText(email);
-        username.setText(name);
+            } else {
+                rating.setVisibility(View.GONE);
+                thumb_up.setVisibility(View.GONE);
+                thumb_down.setVisibility(View.GONE);
+            }
+            num.setText(phone);
+            pr_email.setText(email);
+            username.setText(name);
 
-        num_edit.setOnClickListener(this);
+            iv_call.setVisibility(View.VISIBLE);
+            iv_email.setVisibility(View.VISIBLE);
+
+            iv_call.setOnClickListener(this);
+            iv_email.setOnClickListener(this);
     }
 
     @Override
@@ -143,29 +151,36 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            /*edit user phone number
+
+            /*make a call
              * */
-            case R.id.num_edit:
-                editDialog = new EditDialog(this);
-                editDialog.setCancelable(false);
-                editDialog.setOkClickListener(new BaseDialog.OKClickListener() {
+
+            case R.id.iv_call:
+                okCancelDialog = new OKCancelDialog(this);
+                okCancelDialog.setCancelable(false);
+                okCancelDialog.setOkClickListener(new OKCancelDialog.OKClickListener() {
                     @Override
                     public void Ok() {
-                        phone = editDialog.getEditTextString();
-                        Profile newProfile = new Profile(email,name,phone,type);
-                        db.collection("Users").document(email).set(newProfile);
-                        num.setText(editDialog.getEditTextString());
+                        CallUtils.callPhone(DriverActivity.this,phone);
+                        okCancelDialog.dismiss();
                     }
                 });
-                editDialog.setOnCancelClickListener(new BaseDialog.OnCancelClickListener() {
+                okCancelDialog.setOnCancelClickListener(new OKCancelDialog.OnCancelClickListener() {
                     @Override
                     public void cancel() {
-                        editDialog.dismiss();
+                        okCancelDialog.dismiss();
                     }
                 });
-                editDialog.show(phone);
-                break;
 
+                okCancelDialog.show();
+                okCancelDialog.setOKCancel(R.string.ok,R.string.cancel);
+                okCancelDialog.setTvTitle("Call "+phone);
+                break;
+            /*send a email
+             * */
+            case R.id.iv_email:
+                CallUtils.sendMail(this,email);
+                break;
         }
     }
 }
