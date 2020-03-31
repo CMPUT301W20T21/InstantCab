@@ -384,6 +384,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
             https://stackoverflow.com/questions/53332471/checking-if-a-document-exists-in-a-firestore-collection
              */
             if(checkInternetConnectivity()) {
+                // check if rider already has an active request
                 DocumentReference docIdRef = db.collection("Request").document(email);
                 docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
