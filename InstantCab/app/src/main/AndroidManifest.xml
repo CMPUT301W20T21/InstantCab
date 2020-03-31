@@ -75,6 +75,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RiderRequest" />
         </activity>
+         <activity
+            android:name=".DriverProfile"
+            android:label="@string/app_name"
+            android:parentActivityName=".DriverLocationActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DriverLocationActivity" />
+        </activity>
         <activity
             android:name=".RiderMapsActivity"
             android:label="@string/title_activity_maps"></activity>
