@@ -102,7 +102,14 @@
                 android:value="com.example.instantcab.MainActivity" />
         </activity>
         <activity android:name=".PayQRAct" />
-        <activity android:name=".ScanQR" />
+
+        <activity
+            android:name=".ScanQR"
+            android:parentActivityName=".DriverLocationActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.instantcab.DriverLocationActivity" />
+        </activity>
         <activity
             android:name=".ScanActivity"
             android:parentActivityName=".ScanQR">
