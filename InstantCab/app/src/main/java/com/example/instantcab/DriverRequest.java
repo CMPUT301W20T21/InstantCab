@@ -85,7 +85,7 @@ public class DriverRequest extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_rider_request);
+        setContentView(R.layout.activity_driver_request);
         riderStatus = findViewById(R.id.rider_status);
         showRider = findViewById(R.id.rider_name);
         showFare = findViewById(R.id.fare);
@@ -174,16 +174,16 @@ public class DriverRequest extends AppCompatActivity {
         }
 
         // when click on the driver's username, show his/her contact info
-        showRider.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!riderName.equals("")) {
-                    Intent intent = new Intent(DriverRequest.this, DriverActivity.class);
-                    intent.putExtra("DRIVER", riderEmail);
-                    startActivity(intent);
-                }
-            }
-        });
+//        showRider.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (!riderName.equals("")) {
+//                    Intent intent = new Intent(DriverRequest.this, DriverActivity.class);
+//                    intent.putExtra("DRIVER", riderEmail);
+//                    startActivity(intent);
+//                }
+//            }
+//        });
 
         ButtonBack = findViewById(R.id.back);
 
@@ -243,7 +243,7 @@ public class DriverRequest extends AppCompatActivity {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     riderName = documentSnapshot.getString("username");
-                    showRider.setText(riderName);
+//                    showRider.setText(riderName);
                 }
             });
         }
