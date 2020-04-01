@@ -199,7 +199,7 @@ public class SignUpAct extends AppCompatActivity {
                             }
                         });
 
-                startActivity(new Intent(SignUpAct.this,DriverLocationActivity.class));
+                startActivity(new Intent(SignUpAct.this,DriverHomeActivity.class));
             }
             else{
                 startActivity(new Intent(SignUpAct.this,RiderMapsActivity.class));            }
