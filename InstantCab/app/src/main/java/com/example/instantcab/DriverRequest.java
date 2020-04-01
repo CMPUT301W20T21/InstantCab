@@ -126,64 +126,65 @@ public class DriverRequest extends AppCompatActivity {
                 }
             });
 
-//            request.addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<DocumentSnapshot>() {
-//                @Override
-//                public void onEvent(@Nullable DocumentSnapshot snapshot,
-//                                    @Nullable FirebaseFirestoreException e) {
-//                    if (req[0] == null) {
-//                        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                            @Override
-//                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                                req[0] = documentSnapshot.toObject(Request.class);
-//                            }
-//                        });
-//                    }
-//                    if (snapshot != null && snapshot.exists()) {
-//                        riderEmail = snapshot.getString("email");
-//                        if (riderEmail != null && indicator == 0) {
-//                            indicator += 1;
-//
-//                            // display the driver name
-//                            DocumentReference doc = db.collection("Users").document(riderEmail);
-//                            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                                @Override
-//                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                                    riderName = documentSnapshot.getString("username");
-//                                    showRider.setText(riderName);
-//                                    req[0] = documentSnapshot.toObject(Request.class);
-//                                    if (riderStatus.getText() == "Waiting for rider to confirm" && req[0] != null) {
-//                                        req[0].setDriver(driverEmail);
-//                                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
-//                                        driverStatus.setText("Driver picked up request");
-//                                        //changeStatus(req, email, request, "accepted");
-//                                        // need the app to issue a notification
-//                                        showNotification();
-//                                    }
-//                                }
-//                            });
-//                        }
-//                    }
-//                }
-//            });
+            request.addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                    @Nullable FirebaseFirestoreException e) {
+                    if (req[0] == null) {
+                        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                req[0] = documentSnapshot.toObject(Request.class);
+                            }
+                        });
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        riderEmail = snapshot.getString("email");
+                        if (riderEmail != null && indicator == 0) {
+                            indicator += 1;
+
+                            // display the rider name
+                            DocumentReference doc = db.collection("Users").document(riderEmail);
+                            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    riderName = documentSnapshot.getString("username");
+                                    showRider.setText(riderName);
+                                    req[0] = documentSnapshot.toObject(Request.class);
+                                    if (riderStatus.getText() == "Waiting for rider to confirm" && req[0] != null) {
+                                        //req[0].setDriver(driverEmail);
+                                        //ButtonConfirmRequest.setVisibility(View.VISIBLE);
+                                        //driverStatus.setText("Driver picked up request");
+                                        //changeStatus(req, email, request, "accepted");
+                                        // need the app to issue a notification
+                                        showNotification();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
 
             updateLocalRequest();
         }
         else{
             Log.i("connectivity", "no");
-//            loadLocalRequest();
+            loadLocalRequest();
         }
 
-        // when click on the driver's username, show his/her contact info
-//        showRider.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (!riderName.equals("")) {
-//                    Intent intent = new Intent(DriverRequest.this, DriverActivity.class);
-//                    intent.putExtra("DRIVER", riderEmail);
-//                    startActivity(intent);
-//                }
-//            }
-//        });
+        // when click on the rider's username, show his/her contact info
+        showRider.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!riderName.equals("")) {
+                    Intent intent = new Intent(DriverRequest.this, DriverActivity.class);
+                    intent.putExtra("DRIVER", riderEmail);
+                    startActivity(intent);
+                }
+            }
+        });
+
 
         ButtonBack = findViewById(R.id.back);
 
@@ -260,76 +261,61 @@ public class DriverRequest extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
-//    public void loadLocalRequest(){
-//        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-//        Gson gson = new Gson();
-//        String json = sharedPreferences.getString(RiderMapsActivity.userEmail, "");
-//        Type type = new TypeToken<Request>() {}.getType();
-//        Request request = gson.fromJson(json, type);
-//
-//        // check if there is any data
-//        if(request == null){
-//            // set text "no active request"
-//            setContentView(R.layout.activity_no_request);
-//            ButtonBack = findViewById(R.id.back);
-//
-//            ButtonBack.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    // Clicked when the rider confirms his request
-//                    Intent intent = new Intent(DriverRequest.this, RiderMapsActivity.class);
-//                    startActivity(intent);
-//                }
-//            });
-//        }
-//        else{
-//            email = request.getEmail();
-//            // expect to send in the driver's name and also the fare
-//            fare = request.getFare();
-//            // show the fare
-//            showFare.setText(fare);
-//
-//            // show pick-up point and destination
-//            destination.setText(request.getDestinationName());
-//            starting.setText(request.getStartLocationName());
-//
-//            driverName = request.getDriverName();
-//            Log.i("load1", driverName+"here status"+request.getStatus());
-//
-//            if (request.getStatus() != null) {
-////                displayDriver(driverEmail);
-//                Log.i("load2", driverName+"here status"+request.getStatus());
-//                String a = request.getStatus();
-//                switch (a) {
-//                    case "accepted":
-//                        driverStatus.setText("Driver picked up request");
-//                        ButtonConfirmRequest.setVisibility(View.VISIBLE);
-//                        showDriver.setText(driverName);
-//                        break;
-//                    case "confirmed":
-//                        driverStatus.setText("Driver is on the way");
-//                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
-//                        ButtonPickedUp.setVisibility(View.VISIBLE);
-//                        showDriver.setText(driverName);
-//                        break;
-//                    case "picked up":
-//                        driverStatus.setText("Driver picked up rider");
-//                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
-//                        ButtonCancelRequest.setVisibility(View.INVISIBLE);
-//                        ButtonPickedUp.setVisibility(View.INVISIBLE);
-//                        ButtonArrive.setVisibility(View.VISIBLE);
-//                        showDriver.setText(driverName);
-//                        break;
-//                    case "pending":
-//                        driverStatus.setText("Waiting for driver to pick up");
-//                        break;
-//                }
-//            }
-//            else{
-//                Log.i("load3", driverName+"here status"+request.getStatus());
-//            }
-//        }
-//    }
+    public void loadLocalRequest(){
+        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(DriverHomeActivity.driverEmail, "");
+        Type type = new TypeToken<Request>() {}.getType();
+        Request request = gson.fromJson(json, type);
+
+        // check if there is any data
+        if(request == null){
+            // set text "no active request"
+            setContentView(R.layout.activity_no_request);
+            ButtonBack = findViewById(R.id.back);
+
+            ButtonBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Clicked when the rider confirms his request
+                    Intent intent = new Intent(DriverRequest.this, RiderMapsActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+        else{
+            email = request.getEmail();
+            // expect to send in the driver's name and also the fare
+            fare = request.getFare();
+            // show the fare
+            showFare.setText(fare);
+
+            // show pick-up point and destination
+            destination.setText(request.getDestinationName());
+            starting.setText(request.getStartLocationName());
+
+            Log.i("load1", riderName+"here status"+request.getStatus());
+
+            if (request.getStatus() != null) {
+//                displayDriver(driverEmail);
+                Log.i("load2", riderName+"here status"+request.getStatus());
+                String a = request.getStatus();
+                switch (a) {
+                    case "accepted":
+                        riderStatus.setText("Rider confirmed request");
+                        showRider.setText(riderName);
+                        break;
+                    case "confirmed":
+                        riderStatus.setText("Waiting for rider to confirm");
+                        showRider.setText(riderName);
+                        break;
+                }
+            }
+            else{
+                Log.i("load3", riderName+"here status"+request.getStatus());
+            }
+        }
+    }
 
     public void updateLocalRequest(){
 //        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
