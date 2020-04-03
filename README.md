@@ -45,6 +45,12 @@ Answer by https://stackoverflow.com/a/14702636/12826510
 * Stack Overflow post by user5710756 https://stackoverflow.com/users/5710756/user5710756
 Answer https://stackoverflow.com/a/39179202/12826510
 
+* Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18463758#18463758
+
+* Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18904599#18904599
+
 
  ## References under author `peiyuan1`
  
