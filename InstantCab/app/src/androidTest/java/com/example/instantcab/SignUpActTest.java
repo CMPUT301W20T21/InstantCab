@@ -100,7 +100,7 @@ public class SignUpActTest {
         Button signUp = (Button) solo.getView(R.id.signButton);
         solo.clickOnView(signUp);
 
-        solo.assertCurrentActivity("Wrong Activity", DriverLocationActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", DriverHomeActivity.class);
     }
 
     /**

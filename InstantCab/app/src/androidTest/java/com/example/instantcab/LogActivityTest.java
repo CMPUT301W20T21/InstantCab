@@ -86,7 +86,7 @@ public class LogActivityTest {
         Button log = (Button) solo.getView(R.id.logButton);
         solo.clickOnView(log);
 
-        solo.assertCurrentActivity("Wrong Activity", DriverLocationActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", DriverHomeActivity.class);
     }
 
     /**

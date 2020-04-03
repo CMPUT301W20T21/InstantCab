@@ -184,8 +184,8 @@ public class DriverRequest extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!riderName.equals("")) {
-                    Intent intent = new Intent(DriverRequest.this, DriverActivity.class);
-                    intent.putExtra("DRIVER", riderEmail);
+                    Intent intent = new Intent(DriverRequest.this, ViewRiderActivity.class);
+                    intent.putExtra("RIDER", riderEmail);
                     startActivity(intent);
                 }
             }
