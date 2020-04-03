@@ -342,6 +342,7 @@ public class RiderRequest extends AppCompatActivity {
      * update the fare
      * @param req
      * the rider request object
+     * @author lijiangn lshang
      */
     private void updateUi(Request []req){
         // expect to send in the driver's name and also the fare
@@ -418,6 +419,9 @@ public class RiderRequest extends AppCompatActivity {
 
     }
 
+    /**
+     * display the request on the rider's phone when a driver accepts it
+     */
     private void showNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
                 .setSmallIcon(R.drawable.ic_launcher_background)
@@ -430,6 +434,7 @@ public class RiderRequest extends AppCompatActivity {
 
     /**
      * update the UI using locally stored date when there is no internet connection
+     * @author lshang
      */
     public void loadLocalRequest(){
         /*
@@ -510,6 +515,7 @@ public class RiderRequest extends AppCompatActivity {
 
     /**
      * update local request date when there is internet connection
+     * @author lshang
      */
     public void updateLocalRequest(Request request){
                 if (request == null) {
@@ -528,6 +534,7 @@ public class RiderRequest extends AppCompatActivity {
     /**
      * check if has internet connection
      * @return boolean whether has internet connection
+     * @author lshang
      */
     private Boolean checkInternetConnectivity(){
         ConnectivityManager cm =
