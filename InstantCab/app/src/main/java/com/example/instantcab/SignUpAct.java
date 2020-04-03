@@ -43,6 +43,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * In future updates the SignUp activity will be accompanied by a necessary Check and Flag function
@@ -198,7 +199,10 @@ public class SignUpAct extends AppCompatActivity {
                                 Log.d(TAG, "addRatingCollection: failure");
                             }
                         });
-
+                //Sets up a wallet for the driver
+                Map<String, Float> walletData = new HashMap<>();
+                walletData.put("Money", (float) 0);
+                db.collection("Wallet").document(mailText).set(walletData);
                 startActivity(new Intent(SignUpAct.this,DriverHomeActivity.class));
             }
             else{

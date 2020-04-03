@@ -20,4 +20,14 @@
         android:text="Your earnings will be displayed here."
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#000" />
+
+    <TextView
+        android:id="@+id/walletresult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Your wallet will be displayed here."
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000" />
+
 </LinearLayout>

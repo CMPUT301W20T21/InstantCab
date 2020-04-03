@@ -54,12 +54,8 @@ import java.util.Calendar;
 import javax.annotation.Nullable;
 
 /**
- * This Activity is reserved for the eventual addition of QR Bucks payment
- * Alongside the option for the rider to rate the driver with a thumbs up or down
- * This will be the final page that each request sees before they are removed from the database
- *
- * This class may not work as intended due to the limitations of the OnSuccessListener
- * If not I will ask the TA on next Lab section
+ * This activity generates and displays a QR code based on a string combined with the agreed upon
+ * fare with the added tip. It also alows you to rate the driver as good or bad. Otherwise you don't rate them at all.
  *
  * @author kbojakli
  */
@@ -88,6 +84,9 @@ public class PayQRAct extends AppCompatActivity {
         Button confirm = findViewById(R.id.paymentConfirm);
         qrView = findViewById(R.id.QRView);
 
+        /**
+         * The Bitmap Functions are used from https://demonuts.com/generate-qr-code/
+         */
         try {
             bitmap = TextToImageEncode("I owe you: "+ fare);
             qrView.setImageBitmap(bitmap);
@@ -97,7 +96,7 @@ public class PayQRAct extends AppCompatActivity {
 
         final RadioGroup rate = findViewById(R.id.rateGroup);
         final RadioButton goodButton = findViewById(R.id.radioGood);
-
+        //Gets rating Info and changes according to radio button
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,7 +127,11 @@ public class PayQRAct extends AppCompatActivity {
 
     }
 
-
+    /**
+     * Update Rating updates the user given rating and moves back to the rider map
+     * @param good
+     * @param bad
+     */
     public void updateRating(int good, int bad){
         Rating newRating = new Rating(good,bad);
         assert email != null;
@@ -144,15 +147,16 @@ public class PayQRAct extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.d(TAG, "RatingUpdated: Failure");
                     }
+
                 });
-
-
         startActivity(new Intent(PayQRAct.this,RiderMapsActivity.class));
 
 
     }
 
-
+    /**
+     * The TextToImage Function is used from https://demonuts.com/generate-qr-code/
+     */
     private Bitmap TextToImageEncode(String Value) throws WriterException {
         BitMatrix bitMatrix;
         try {

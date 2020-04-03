@@ -27,6 +27,7 @@ public class CheckFlag {
      * @param email
      * @return
      */
+    //Email check is used with assistance of https://www.geeksforgeeks.org/check-email-address-valid-not-java/
     public static boolean isEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
                 "[a-zA-Z0-9_+&*-]+)*@" +
