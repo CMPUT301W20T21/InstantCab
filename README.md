@@ -32,6 +32,12 @@ from the "Create a Password based account" section part 4
 
   * This Authorization was built with the assistance of https://firebase.google.com/docs/auth/android/password-auth
 from the "Sign in a user with an email address and password" section part 3
+  
+  * The QR code Generation was built using https://demonuts.com/generate-qr-code/ and edited to fit the code
+  
+  * The QR code Scanner was built using https://demonuts.com/scan-barcode-qrcode/ and edited to fit the code
+  
+  * Email check is used with assistance of https://www.geeksforgeeks.org/check-email-address-valid-not-java/
 
 
  ## References under author `lshang`
