@@ -107,20 +107,21 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
         thumb_down = findViewById(R.id.thumb_down);
         iv_email = findViewById(R.id.iv_email);
         iv_call = findViewById(R.id.iv_call);
-        if (type == "Driver") {
+        if (type.equals("Driver")) {
             DocumentReference dbDoc = db.collection("Rating").document(email);
             dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Rating rating = documentSnapshot.toObject(Rating.class);
-                assert rating != null;
-                good = rating.getGood();
-                bad = rating.getBad();
+                Rating driverRating = documentSnapshot.toObject(Rating.class);
+                assert driverRating != null;
+                good = driverRating.getGood();
+                bad = driverRating.getBad();
+                thumb_up.setText(String.valueOf(good));
+                thumb_down.setText(String.valueOf(bad));
+                rating.setVisibility(View.VISIBLE);
                 }
             });
-            thumb_up.setText(String.valueOf(good));
-            thumb_down.setText(String.valueOf(bad));
-            rating.setVisibility(View.VISIBLE);
+
             } else {
                 rating.setVisibility(View.GONE);
                 thumb_up.setVisibility(View.GONE);

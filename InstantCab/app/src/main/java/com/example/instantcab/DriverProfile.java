@@ -107,19 +107,21 @@ public class DriverProfile extends AppCompatActivity implements View.OnClickList
         dbDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Rating rating = documentSnapshot.toObject(Rating.class);
-                assert rating != null;
-                good = rating.getGood();
-                bad = rating.getBad();
+                Rating driverRating = documentSnapshot.toObject(Rating.class);
+                assert driverRating != null;
+                good = driverRating.getGood();
+                bad = driverRating.getBad();
+
+                thumb_up.setText(String.valueOf(good));
+                thumb_down.setText(String.valueOf(bad));
+                rating.setVisibility(View.VISIBLE);
+                num_edit.setVisibility(View.VISIBLE);
+                num.setText(phone);
+                pr_email.setText(email);
+                username.setText(name);
                 }
             });
-        thumb_up.setText(String.valueOf(good));
-        thumb_down.setText(String.valueOf(bad));
-        rating.setVisibility(View.VISIBLE);
-        num_edit.setVisibility(View.VISIBLE);
-        num.setText(phone);
-        pr_email.setText(email);
-        username.setText(name);
+
         num_edit.setOnClickListener(this);
     }
 

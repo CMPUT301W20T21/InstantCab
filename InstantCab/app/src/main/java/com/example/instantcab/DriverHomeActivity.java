@@ -459,7 +459,7 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         else if (item.getItemId() == R.id.profile) {
-            Intent intent = new Intent(this, ProfileActivity.class);
+            Intent intent = new Intent(this, DriverProfile.class);
             startActivity(intent);
         }
 
