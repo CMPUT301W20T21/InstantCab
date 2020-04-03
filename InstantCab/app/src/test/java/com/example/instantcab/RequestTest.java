@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestTest {
     private Request mockRequest(){
-        return new Request("test@email.com", 50.0, 60.0, 55.0, 65.0, "12.0", "pending", "Hub Mall", "Cameron Library");
+        return new Request("test@email.com", 50.0, 60.0, 55.0, 65.0, "12.0", "pending", "Hub Mall", "Cameron Library", "driver email", "John Doe", "Rider Name");
     }
 
     @Test
@@ -86,7 +86,21 @@ public class RequestTest {
     public void testGetDriver(){
         Request request = mockRequest();
 
-        assertNull(request.getDriver());
+        assertEquals("driver email",request.getDriver());
+    }
+
+    @Test
+    public void testGetDriverName(){
+        Request request = mockRequest();
+
+        assertEquals("John Doe",request.getDriverName());
+    }
+
+    @Test
+    public void testGetRiderName(){
+        Request request = mockRequest();
+
+        assertEquals("Rider Name",request.getRiderName());
     }
 
     @Test
@@ -96,5 +110,14 @@ public class RequestTest {
         request.setDriver("Jane Doe");
 
         assertEquals("Jane Doe", request.getDriver());
+    }
+
+    @Test
+    public void testSetDriverName(){
+        Request request = mockRequest();
+
+        request.setDriverName("Jane Doe");
+
+        assertEquals("Jane Doe", request.getDriverName());
     }
 }

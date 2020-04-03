@@ -113,6 +113,11 @@ public class DriverRequest extends AppCompatActivity {
                         setContentView(R.layout.activity_no_request);
                         ButtonBack = findViewById(R.id.back);
 
+                        SharedPreferences preferences = getSharedPreferences("localRequest", 0);
+                        if(preferences.contains(email)){
+                            preferences.edit().remove(email).apply();
+                        }
+
                         ButtonBack.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -122,7 +127,10 @@ public class DriverRequest extends AppCompatActivity {
                             }
                         });
                     }
-                    else updateUi(req);
+                    else {
+                        updateUi(req);
+                        updateLocalRequest(req[0]);
+                    }
                 }
             });
 
@@ -165,8 +173,6 @@ public class DriverRequest extends AppCompatActivity {
                     }
                 }
             });
-
-            updateLocalRequest();
         }
         else{
             Log.i("connectivity", "no");
@@ -220,7 +226,7 @@ public class DriverRequest extends AppCompatActivity {
             String a = req[0].getStatus();
             switch (a) {
                 case "confirmed":
-                    riderStatus.setText("Rider confirmed request");
+                    riderStatus.setText("Rider confirmed go pick up");
                     break;
                 case "picked up":
                     riderStatus.setText("You picked up rider");
@@ -261,7 +267,16 @@ public class DriverRequest extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
+    /**
+     * update the UI using locally stored date when there is no internet connection
+     */
     public void loadLocalRequest(){
+        /*
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18463758#18463758
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18904599#18904599
+         */
         SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(DriverHomeActivity.driverEmail, "");
@@ -284,7 +299,7 @@ public class DriverRequest extends AppCompatActivity {
             });
         }
         else{
-            email = request.getEmail();
+            riderEmail = request.getEmail();
             // expect to send in the driver's name and also the fare
             fare = request.getFare();
             // show the fare
@@ -294,6 +309,8 @@ public class DriverRequest extends AppCompatActivity {
             destination.setText(request.getDestinationName());
             starting.setText(request.getStartLocationName());
 
+            riderName = request.getRiderName();
+            showRider.setText(riderName);
             Log.i("load1", riderName+"here status"+request.getStatus());
 
             if (request.getStatus() != null) {
@@ -302,11 +319,15 @@ public class DriverRequest extends AppCompatActivity {
                 String a = request.getStatus();
                 switch (a) {
                     case "accepted":
-                        riderStatus.setText("Rider confirmed request");
+                        riderStatus.setText("Waiting for rider to confirm");
                         showRider.setText(riderName);
                         break;
                     case "confirmed":
-                        riderStatus.setText("Waiting for rider to confirm");
+                        riderStatus.setText("Rider confirmed go pick up");
+                        showRider.setText(riderName);
+                        break;
+                    case "picked up":
+                        riderStatus.setText("You picked up rider");
                         showRider.setText(riderName);
                         break;
                 }
@@ -317,53 +338,10 @@ public class DriverRequest extends AppCompatActivity {
         }
     }
 
-    public void updateLocalRequest(){
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user != null) {
-//            // User is signed in
-//            String email = user.getEmail();
-//            Log.i("have user", email);
-//
-//            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            Gson gson = new Gson();
-//            String json = gson.toJson(request);
-//            editor.putString(email, json);
-//            editor.apply();
-//        } else {
-//            // No user is signed in
-//            Log.i("does not have user", "fail");
-//        }
-
-
-        db = FirebaseFirestore.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            email = user.getEmail();
-        }
-        else {email = "test@email.com";}
-
-        CollectionReference requests = db.collection("Request");
-        final DocumentReference request = requests.document(email);
-        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                req[0] = documentSnapshot.toObject(Request.class);
-                if (req[0] == null) {
-
-                }
-                else {
-                    SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    Gson gson = new Gson();
-                    String json = gson.toJson(req[0]);
-                    editor.putString(email, json);
-                    editor.apply();
-                }
-            }
-        });
-    }
-
+    /**
+     * check if has internet connection
+     * @return boolean whether has internet connection
+     */
     private Boolean checkInternetConnectivity(){
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -373,5 +351,22 @@ public class DriverRequest extends AppCompatActivity {
                 activeNetwork.isConnectedOrConnecting();
 
         return isConnected;
+    }
+
+    /**
+     * update local request date when there is internet connection
+     */
+    public void updateLocalRequest(Request request){
+        if (request == null) {
+
+        }
+        else {
+            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(request);
+            editor.putString(email, json);
+            editor.apply();
+        }
     }
 }

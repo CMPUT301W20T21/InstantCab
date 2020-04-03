@@ -177,30 +177,38 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                 //jump to DriverAcceptRequest Activity
                 //if a marker was clicked before, information about the marker would be carried to new Activity
                 if (tmpRequest != null) {
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    if (user != null) {
-                        // User is signed in
-                        String email = user.getEmail();
-                        Log.i("have user", email);
+                    if(checkInternetConnectivity()) {
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        if (user != null) {
+                            // User is signed in
+                            String email = user.getEmail();
+                            Log.i("have user", email);
 
-                        db = FirebaseFirestore.getInstance();
+                            db = FirebaseFirestore.getInstance();
 
-                        db.collection("DriverRequest").document(email).set(tmpRequest);
+                            tmpRequest.setStatus("accepted");
+                            tmpRequest.setDriver(driverEmail);
+                            tmpRequest.setDriverName(driverName);
 
-                        tmpRequest.setStatus("accepted");
-                        tmpRequest.setDriver(driverEmail);
-                        tmpRequest.setDriverName(driverName);
+                            db.collection("DriverRequest").document(email).set(tmpRequest);
 
-                        db.collection("Request").document(tmpRequest.getEmail()).set(tmpRequest);
+                            db.collection("Request").document(tmpRequest.getEmail()).set(tmpRequest);
 
-                        saveLocalRequest(tmpRequest);
+                            saveLocalRequest(tmpRequest);
 
-                        Intent intent = new Intent(DriverHomeActivity.this, DriverRequest.class);
-                        startActivity(intent);
-                    } else {
-                        // No user is signed in
-                        Log.i("does not have user", "fail");
+                            Intent intent = new Intent(DriverHomeActivity.this, DriverRequest.class);
+                            startActivity(intent);
+                        } else {
+                            // No user is signed in
+                            Log.i("does not have user", "fail");
+                        }
                     }
+                    else{
+                        Toast.makeText(DriverHomeActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else{
+                    Toast.makeText(DriverHomeActivity.this, "Pick a request first", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -219,17 +227,11 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Log.i("data", doc.getData().toString());
 
-                        //double dest_lat = (double) doc.get("dest_lat");
-                        //double dest_lon = (double) doc.get("dest_lon");
                         String email = (String) doc.get("email");
                         Double start_lat = doc.get("startLatitude", Double.class);
                         Double start_lon = doc.get("startLongitude", Double.class);
                         String status = doc.get("status", String.class);
-                        //userInfo.put("dest_lat",dest_lat);
-                        //userInfo.put("dest_lon",dest_lon);
-                        //userInfo.put("email",email);
-                        //userInfo.put("start_lat",start_lat);
-                        //userInfo.put("start_lon",start_lon);
+
                         if(status.equals("pending")) {
                             createMarker(start_lat, start_lon, email);
                         }
@@ -240,7 +242,7 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                 }
             }
         });
-        //Log.i("info", userInfo.);
+
         return;
     }
 
@@ -291,12 +293,21 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                                 else{
                                     LatLng start = new LatLng(request.getStartLatitude(), request.getStartLongitude());
                                     order = mMap.addMarker(new MarkerOptions().title("pick up").position(start));
+                                    order.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                                    order.showInfoWindow();
+                                    updateLocalRequest(request);
                                 }
                             }
                             else {
                                 Log.d(TAG, "Failed with: ", task.getException());
                                 retrieveData();
                                 btnAccept.setVisibility(View.VISIBLE);
+
+                                SharedPreferences preferences = getSharedPreferences("localRequest", 0);
+                                if(preferences.contains(driverEmail)){
+                                    Log.d(TAG, "Document exists!");
+                                    preferences.edit().remove(driverEmail).apply();
+                                }
                             }
                         }
                         else {
@@ -311,6 +322,12 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                 if(preferences.contains(email)){
                     Log.d(TAG, "Document exists!");
                     btnAccept.setVisibility(View.GONE);
+                    titleStart.setText("You have an active request");
+                    titleDest.setVisibility(View.GONE);
+                    titleFare.setVisibility(View.GONE);
+                    textDest.setVisibility(View.GONE);
+                    textFare.setVisibility(View.GONE);
+                    textStart.setVisibility(View.GONE);
                 }
                 else{
                     Log.d(TAG, "Document does not exist!");
@@ -368,11 +385,14 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
                 if (previousMarker != null) {
                     previousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                if(!marker.getTitle().equals("pick up")) {
+                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                }
                 // click marker should edit textView below.
                 String markerEmail = marker.getTitle();
                 // marker selected should not be driver's own location marker
                 if(marker.getTitle().equals("pick up")){
+                    marker.showInfoWindow();
                     return true;
                 }
                 else if (!markerEmail.equals("Driver Location")){
@@ -468,84 +488,9 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
         notificationManager.notify(1, builder.build());
     }
 
-    private void loadLocalRequest(){
-        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString(RiderMapsActivity.userEmail, "");
-        Type type = new TypeToken<Request>() {}.getType();
-        Request request = gson.fromJson(json, type);
-
-        // check if there is any data
-        if(request == null){
-            // set text "no active request"
-            setContentView(R.layout.activity_no_request);
-//            ButtonBack = findViewById(R.id.back);
-//
-//            ButtonBack.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    // Clicked when the rider confirms his request
-//                    setContentView(R.layout.activity_driver_location);
-//                }
-//            });
-        }
-        else{
-            String email = request.getEmail();
-            // expect to send in the driver's name and also the fare
-            String fare = request.getFare();
-            // show the fare
-
-            // show pick-up point and destination
-            String destinationName = request.getDestinationName();
-            String startLocationName = request.getStartLocationName();
-
-            String driverName = request.getDriverName();
-            Log.i("load1", driverName+"here status"+request.getStatus());
-
-            if (request.getStatus() != null) {
-//                displayDriver(driverEmail);
-                Log.i("load2", driverName+"here status"+request.getStatus());
-                String a = request.getStatus();
-                switch (a) {
-                    case "accepted":
-                        Intent intent1 = new Intent(this, DriverAcceptRequest.class);
-                        Bundle bundle1 = new Bundle();
-                        bundle1.putString("from", startLocationName);
-                        bundle1.putString("to", destinationName);
-                        bundle1.putString("email", email);
-                        bundle1.putString("fare", fare);
-                        intent1.putExtras(bundle1);
-                        startActivity(intent1);
-                        break;
-                    case "confirmed":
-                        Intent intent2 = new Intent(this, RiderConfirmRequest.class);
-                        Bundle bundle2 = new Bundle();
-                        bundle2.putString("from", startLocationName);
-                        bundle2.putString("to", destinationName);
-                        bundle2.putString("email", email);
-                        bundle2.putString("fare", fare);
-                        intent2.putExtras(bundle2);
-                        startActivity(intent2);
-                        break;
-//                    case "picked up":
-//                        driverStatus.setText("Driver picked up rider");
-//                        ButtonConfirmRequest.setVisibility(View.INVISIBLE);
-//                        ButtonCancelRequest.setVisibility(View.INVISIBLE);
-//                        ButtonPickedUp.setVisibility(View.INVISIBLE);
-//                        ButtonArrive.setVisibility(View.VISIBLE);
-//                        showDriver.setText(driverName);
-//                        break;
-//                    case "pending":
-//                        driverStatus.setText("Waiting for driver to pick up");
-//                        break;
-                }
-            }
-            else{
-                Log.i("load3", driverName+"here status"+request.getStatus());
-            }
-        }
-    }
-
+    /**
+     * save accepted request to local database
+     */
     public void saveLocalRequest(Request request){
         if (driverEmail != null) {
             // User is signed in
@@ -561,48 +506,6 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
             // No user is signed in
             Log.i("does not have user", "fail");
         }
-    }
-
-    public void updateLocalRequest(){
-        db = FirebaseFirestore.getInstance();
-        final String driverEmail;
-        final String[] riderEmail = new String[1];
-        final Request[] req = new Request[1];
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            driverEmail = user.getEmail();
-        }
-        else {driverEmail = "test@email.com";}
-
-        CollectionReference driverRequests = db.collection("Driver's Request");
-        final DocumentReference driverRequest = driverRequests.document(driverEmail);
-        driverRequest.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                riderEmail[0] = documentSnapshot.get("riderEmail", String.class);
-
-                CollectionReference requests = db.collection("Request");
-                final DocumentReference request = requests.document(riderEmail[0]);
-                request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        req[0] = documentSnapshot.toObject(Request.class);
-                        if (req[0] == null) {
-
-                        }
-                        else {
-                            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            Gson gson = new Gson();
-                            String json = gson.toJson(req[0]);
-                            editor.putString(driverEmail, json);
-                            editor.apply();
-                        }
-                    }
-                });
-            }
-        });
     }
 
     private void getLocationPermission() {
@@ -666,5 +569,22 @@ public class DriverHomeActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onMapClick(LatLng latLng) {
 
+    }
+
+    /**
+     * update local request date when there is internet connection
+     */
+    public void updateLocalRequest(Request request){
+        if (request == null) {
+
+        }
+        else {
+            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(request);
+            editor.putString(driverEmail, json);
+            editor.apply();
+        }
     }
 }

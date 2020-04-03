@@ -1,10 +1,13 @@
 package com.example.instantcab;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -47,8 +50,6 @@ import java.util.Locale;
  * to set start or destination
  * Default start location is current location
  * Riders can also type and search destination
- * TODO: allow user to type and search start location
- * TODO: allow user to reset start location to current location
  *
  * @author lshang
  */
@@ -162,17 +163,6 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                 LatLng res = place.getLatLng();
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
-//                Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
-//                Bundle bundle = new Bundle();
-//                bundle.putDouble("Lat", res.latitude);
-//                bundle.putDouble("Lon", res.longitude);
-//                bundle.putString("Address", place.getName());
-//                bundle.putDouble("currentLat", currentLat);
-//                bundle.putDouble("currentLon", currentLon);
-//                intent.putExtras(bundle);
-//
-//                startActivity(intent);
-
                 destinationLatLng = place.getLatLng();
                 if (destinationMarker == null) {
                     destinationMarker = mMap.addMarker(new MarkerOptions().position(destinationLatLng).title("Destination"));
@@ -242,19 +232,25 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
                     Toast.makeText(EnterRouteActivity.this, "You need a start location and a destination", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putDouble("startLat", startLatLng.latitude);
-                    bundle.putDouble("startLon", startLatLng.longitude);
-                    bundle.putDouble("destLat", destinationLatLng.latitude);
-                    bundle.putDouble("destLon", destinationLatLng.longitude);
-                    bundle.putString("startAddress", startAddr);
-                    bundle.putString("destAddress", destinationAddr);
-                    bundle.putDouble("currentLat", currentLat);
-                    bundle.putDouble("currentLon", currentLon);
-                    intent.putExtras(bundle);
+                    if(checkInternetConnectivity()){
+                        Intent intent = new Intent(EnterRouteActivity.this, PreviewRequestActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putDouble("startLat", startLatLng.latitude);
+                        bundle.putDouble("startLon", startLatLng.longitude);
+                        bundle.putDouble("destLat", destinationLatLng.latitude);
+                        bundle.putDouble("destLon", destinationLatLng.longitude);
+                        bundle.putString("startAddress", startAddr);
+                        bundle.putString("destAddress", destinationAddr);
+                        bundle.putDouble("currentLat", currentLat);
+                        bundle.putDouble("currentLon", currentLon);
+                        intent.putExtras(bundle);
 
-                    startActivity(intent);
+                        startActivity(intent);
+                    }
+                    else{
+                        Toast.makeText(EnterRouteActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
         });
@@ -276,15 +272,6 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-//            Intent intent = new Intent();
-//            Bundle bundle = new Bundle();
-//            bundle.putDouble("Lat", data.getExtras().getDouble("Lat"));
-//            bundle.putDouble("Lon", data.getExtras().getDouble("Lon"));
-//            bundle.putString("Address", data.getExtras().getString("Address"));
-//            intent.putExtras(bundle);
-//            intent.putExtras(data.getExtras());
-//            setResult(RiderMapsActivity.ROUTE_RESULT_CODE, intent);
-//            finish();
             if(resultCode == RESULT_OK) {
                 Log.i("onActivityResult", "we have a result");
                 Place place = Autocomplete.getPlaceFromIntent(data);
@@ -342,7 +329,7 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
             // position on right bottom
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            layoutParams.setMargins(0, 0, 0, 250);
+            layoutParams.setMargins(0, 0, 30, 250);
         }
     }
 
@@ -480,5 +467,20 @@ public class EnterRouteActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         return builder.toString().split(",")[0];
+    }
+
+    /**
+     * check if has internet connection
+     * @return boolean whether has internet connection
+     */
+    private Boolean checkInternetConnectivity(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 }

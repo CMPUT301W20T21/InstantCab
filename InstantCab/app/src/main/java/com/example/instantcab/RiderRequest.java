@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -128,7 +129,10 @@ public class RiderRequest extends AppCompatActivity {
                             }
                         });
                     }
-                    else updateUi(req);
+                    else {
+                        updateLocalRequest(req[0]);
+                        updateUi(req);
+                    }
                 }
             });
 
@@ -171,22 +175,11 @@ public class RiderRequest extends AppCompatActivity {
                     }
                 }
             });
-
-            updateLocalRequest();
         }
         else{
             Log.i("connectivity", "no");
             loadLocalRequest();
         }
-
-
-
-
-
-
-
-
-
 
         ButtonCancelRequest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,6 +200,21 @@ public class RiderRequest extends AppCompatActivity {
                                 public void onFailure(@NonNull Exception e) {
                                 }
                             });
+                    if(driverEmail != null) {
+                        db.collection("DriverRequest").document(driverEmail)
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                    }
+                                });
+                    }
                     // remove request from local data
                     SharedPreferences preferences = getSharedPreferences("localRequest", 0);
                     preferences.edit().remove(email).apply();
@@ -214,6 +222,9 @@ public class RiderRequest extends AppCompatActivity {
                     // move back to the map activity
                     Intent intent = new Intent(RiderRequest.this, RiderMapsActivity.class);
                     startActivity(intent);
+                }
+                else{
+                    Toast.makeText(RiderRequest.this, "No internet connection", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -230,6 +241,9 @@ public class RiderRequest extends AppCompatActivity {
 
                     changeStatus(req, email, "confirmed");
                 }
+                else{
+                    Toast.makeText(RiderRequest.this, "No internet connection", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -245,6 +259,9 @@ public class RiderRequest extends AppCompatActivity {
                     ButtonCancelRequest.setVisibility(View.INVISIBLE);
 
                     changeStatus(req, email, "picked up");
+                }
+                else{
+                    Toast.makeText(RiderRequest.this, "No internet connection", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -271,10 +288,27 @@ public class RiderRequest extends AppCompatActivity {
                                 }
                             });
 
+                    db.collection("DriverRequest").document(driverEmail)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                }
+                            });
+
                     Intent intent = new Intent(RiderRequest.this, PaymentActivity.class);
                     intent.putExtra("FARE", fare);
                     intent.putExtra("Driver", driverEmail);
                     startActivity(intent);
+                }
+                else{
+                    Toast.makeText(RiderRequest.this, "No internet connection", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -376,8 +410,9 @@ public class RiderRequest extends AppCompatActivity {
                 req[0] = documentSnapshot.toObject(Request.class);
                 req[0].setStatus(status);
                 db.collection("Request").document(email).set(req[0]);
+                db.collection("DriverRequest").document(driverEmail).set(req[0]);
 
-                updateLocalRequest();
+                updateLocalRequest(req[0]);
             }
         });
 
@@ -393,7 +428,16 @@ public class RiderRequest extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
+    /**
+     * update the UI using locally stored date when there is no internet connection
+     */
     public void loadLocalRequest(){
+        /*
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18463758#18463758
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18904599#18904599
+         */
         SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(RiderMapsActivity.userEmail, "");
@@ -464,53 +508,27 @@ public class RiderRequest extends AppCompatActivity {
         }
     }
 
-    public void updateLocalRequest(){
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user != null) {
-//            // User is signed in
-//            String email = user.getEmail();
-//            Log.i("have user", email);
-//
-//            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            Gson gson = new Gson();
-//            String json = gson.toJson(request);
-//            editor.putString(email, json);
-//            editor.apply();
-//        } else {
-//            // No user is signed in
-//            Log.i("does not have user", "fail");
-//        }
-
-
-        db = FirebaseFirestore.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            email = user.getEmail();
-        }
-        else {email = "test@email.com";}
-
-        CollectionReference requests = db.collection("Request");
-        final DocumentReference request = requests.document(email);
-        request.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                req[0] = documentSnapshot.toObject(Request.class);
-                if (req[0] == null) {
+    /**
+     * update local request date when there is internet connection
+     */
+    public void updateLocalRequest(Request request){
+                if (request == null) {
 
                 }
                 else {
                     SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     Gson gson = new Gson();
-                    String json = gson.toJson(req[0]);
+                    String json = gson.toJson(request);
                     editor.putString(email, json);
                     editor.apply();
                 }
-            }
-        });
     }
 
+    /**
+     * check if has internet connection
+     * @return boolean whether has internet connection
+     */
     private Boolean checkInternetConnectivity(){
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);

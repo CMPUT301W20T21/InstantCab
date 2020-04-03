@@ -34,9 +34,9 @@ public class Rating {
 
     public Rating(){}
 
-    public Rating(int Good, int Bad){
-        this.Good = Good;
-        this.Bad = Bad;
+    public Rating(int good, int bad){
+        this.Good = good;
+        this.Bad = bad;
 
     }
 
@@ -48,4 +48,11 @@ public class Rating {
         return Bad;
     }
 
+    public void setBad(int bad) {
+        Bad = bad;
+    }
+
+    public void setGood(int good) {
+        Good = good;
+    }
 }
