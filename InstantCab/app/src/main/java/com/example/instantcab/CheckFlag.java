@@ -55,7 +55,7 @@ public class CheckFlag {
             }
         }
 
-        if( count <= 6){
+        if( count >= 6){
             return Boolean.TRUE;
         }
         return Boolean.FALSE;

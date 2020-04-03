@@ -31,6 +31,7 @@ public class Request {
     private String destinationName;
     private String driver;
     private String driverName;
+    private String riderName;
 
 
     public Request(){}
@@ -48,7 +49,7 @@ public class Request {
      * @param destinationName
      */
     public Request(String email, Double startLatitude, Double startLongitude, Double destinationLatitude, Double destinationLongitude,
-                    String fare, String status, String startLocationName, String destinationName){
+                    String fare, String status, String startLocationName, String destinationName, String riderName){
         this.email = email;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -61,6 +62,25 @@ public class Request {
         this.destinationName = destinationName;
         this.driver = null;
         this.driverName = null;
+        this.riderName = riderName;
+
+    }
+
+    public Request(String email, Double startLatitude, Double startLongitude, Double destinationLatitude, Double destinationLongitude,
+                   String fare, String status, String startLocationName, String destinationName, String driver, String driverName, String riderName){
+        this.email = email;
+        this.startLatitude = startLatitude;
+        this.startLongitude = startLongitude;
+        this.destinationLatitude = destinationLatitude;
+        this.destinationLongitude = destinationLongitude;
+        this.fare = fare;
+
+        this.status = status;
+        this.startLocationName = startLocationName;
+        this.destinationName = destinationName;
+        this.driver = driver;
+        this.driverName = driverName;
+        this.riderName = riderName;
 
     }
 
@@ -138,12 +158,24 @@ public class Request {
 
     /**
      *
-     * @return driver who accepted the request
+     * @return email of driver who accepted the request
      */
     public String getDriver() { return driver; }
 
+    /**
+     *
+     * @return driver's username
+     */
     public String getDriverName() {
         return driverName;
+    }
+
+    /**
+     *
+     * @return rider's username
+     */
+    public String getRiderName() {
+        return riderName;
     }
 
     /**
@@ -155,13 +187,17 @@ public class Request {
     }
 
     /**
-     * set request driver
-     * @param name
+     * set request driver's email
+     * @param email
      */
-    public void setDriver(String name){
-        this.driver = name;
+    public void setDriver(String email){
+        this.driver = email;
     }
 
+    /**
+     * set request driver's username
+     * @param driverName
+     */
     public void setDriverName(String driverName) {
         this.driverName = driverName;
     }

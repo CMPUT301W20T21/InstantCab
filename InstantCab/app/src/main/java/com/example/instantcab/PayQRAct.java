@@ -108,7 +108,9 @@ public class PayQRAct extends AppCompatActivity {
                         Rating rating = documentSnapshot.toObject(Rating.class);
                         assert rating != null;
                         good = rating.getGood();
+                        Log.i("rating", good+"here");
                         bad = rating.getBad();
+                        Log.i("rating", bad+"here");
                         if(rate.getCheckedRadioButtonId() != -1){
                             if(goodButton.isChecked()){
                                 good += 1;

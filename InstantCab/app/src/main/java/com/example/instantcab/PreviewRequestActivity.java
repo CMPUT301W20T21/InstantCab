@@ -1,15 +1,19 @@
 package com.example.instantcab;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,11 +26,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firestore.v1.WriteResult;
 import com.google.gson.Gson;
@@ -90,10 +97,14 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
 
     private int DEFAULT_ZOOM = 13;
 
+    private String riderEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preview_request_activity);
+
+        riderEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         destinationRequest = findViewById(R.id.destination_request);
         fare = findViewById(R.id.fare);
@@ -140,11 +151,13 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         sendRequestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveLocalRequest();
+                if(checkInternetConnectivity()) {
 
-                sendRequest();
-//                Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
-//                startActivity(intent);
+                    sendRequest();
+                }
+                else{
+                    Toast.makeText(PreviewRequestActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -375,37 +388,30 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             // User is signed in
-            String email = user.getEmail();
+            final String email = user.getEmail();
             Log.i("have user", email);
 
             db = FirebaseFirestore.getInstance();
 
-//            DatabaseReference mDatabase;
-//// ...
-//            mDatabase = FirebaseDatabase.getInstance().getReference();
-//
-////            DocumentReference dbDoc = db.collection("Users").document(email);
-//
-//            mDatabase.child("users").child(email).child("email").setValue(email);
+            CollectionReference users = db.collection("Users");
+            final DocumentReference rider = users.document(email);
+            rider.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    String riderName = documentSnapshot.get("username", String.class);
+                    Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude,
+                            destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr, riderName);
+                    db.collection("Request").document(email).set(request);
 
-            // Create a Map to store the data we want to set
-//            Map<String, Object> docData = new HashMap<>();
-//            docData.put("email", email);
-//            docData.put("start_lat", originLat);
-//            docData.put("start_lon", originLon);
-//            docData.put("dest_lat", latLng.latitude);
-//            docData.put("dest_lon", latLng.longitude);
-//            docData.put("fare", fare.getText());
-//            docData.put("status", "pending");
-//            // Add a new document (asynchronously) in collection "cities" with id "LA"
-//            db.collection("Request").document(email).set(docData);
+                    saveLocalRequest(request);
 
-            Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
-            db.collection("Request").document(email).set(request);
+                    Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
+                    startActivity(intent);
+                }
+            });
+
+
 //            Log.i("origin location", originAddr);
-
-            Intent intent = new Intent(PreviewRequestActivity.this, RiderRequest.class);
-            startActivity(intent);
         } else {
             // No user is signed in
             Log.i("does not have user", "fail");
@@ -460,25 +466,36 @@ public class PreviewRequestActivity extends AppCompatActivity implements OnMapRe
         return builder.toString().split(",")[0];
     }
 
-    public void saveLocalRequest(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            // User is signed in
-            String email = user.getEmail();
-            Log.i("have user", email);
+    /**
+     * save new request to local database
+     */
+    public void saveLocalRequest(Request request){
+        /*
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18463758#18463758
+            Stackoverflow post by Piraba https://stackoverflow.com/users/831498/piraba
+            Answer https://stackoverflow.com/questions/7145606/how-android-sharedpreferences-save-store-object/18904599#18904599
+        */
+        SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(request);
+        editor.putString(riderEmail, json);
+        editor.apply();
+    }
 
-            Request request = new Request(email, startLatLng.latitude, startLatLng.longitude, destinationLatLng.latitude,
-                    destinationLatLng.longitude, fare.getText().toString(), "pending", startAddr, destAddr);
+    /**
+     * check if has internet connection
+     * @return boolean whether has internet connection
+     */
+    private Boolean checkInternetConnectivity(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-            SharedPreferences sharedPreferences = getSharedPreferences("localRequest", 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(request);
-            editor.putString(email, json);
-            editor.apply();
-        } else {
-            // No user is signed in
-            Log.i("does not have user", "fail");
-        }
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 }

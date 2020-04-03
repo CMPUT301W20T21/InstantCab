@@ -52,12 +52,10 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
-    private Marker mapMarker;
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0x0011;
     private View mapView;
 
-    public static final String START_LOCATION = "com.example.testmap.START_LOCATION";
     private TextView makeRequest;
 
     String TAG = "EnterRouteActivity";
@@ -117,22 +115,6 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
 
         updateUI();
 
-
-        // sign in for testing
-//        mAuth = FirebaseAuth.getInstance();
-//        mAuth.signInWithEmailAndPassword("1111@email.com","12345678")
-//                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        if(task.isSuccessful()){
-//                            // Sign in success, update UI with the signed-in user's information
-//                            Log.d(TAG, "signInAnonymously:success");
-//                        }
-//                        else{
-//                            Log.i("signinFail", "failed");
-//                        }
-//                    }
-//                });
     }
 
 
@@ -190,13 +172,6 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
 
     @Override
     public void onMapClick(LatLng latLng) {
-//        if (mapMarker == null) {
-//            mapMarker = mMap.addMarker(new MarkerOptions().position(latLng));
-//        }
-//        else {
-//            mapMarker.setPosition(latLng);
-//        }
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
     /**
@@ -215,23 +190,12 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == ENTER_ROUTE_REQUEST) {
-//            if (resultCode == RESULT_OK) {
-//                Place place = Autocomplete.getPlaceFromIntent(data);
-//                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-//            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-//                // TODO: Handle the error.
-//                Status status = Autocomplete.getStatusFromIntent(data);
-//                Log.i(TAG, status.getStatusMessage());
-//            } else if (resultCode == RESULT_CANCELED) {
-//                // The user canceled the operation.
-//            }
-//        }
+
         if (requestCode == ENTER_ROUTE_REQUEST) {
             if (resultCode == ROUTE_RESULT_CODE) {
                 Log.i("return", "Lat: " + data.getExtras().getDouble("Lat") + ", " + "Lon: " + data.getExtras().getDouble("Lon")
                         + ", " + "Address: " + data.getExtras().getString("Address"));
-//                Toast.makeText(this, data.getExtras().getString("Address"), Toast.LENGTH_SHORT).show();
+
                 double lat = data.getExtras().getDouble("Lat");
                 double lon = data.getExtras().getDouble("Lon");
                 makeRequest.setText(data.getExtras().getString("Address"));
@@ -240,7 +204,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
-    /**u'p
+    /**
      * get location permission from user
      */
     private void getLocationPermission() {
@@ -376,6 +340,9 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * updates activity's UI by checking if rider already has an active request
+     */
     public void updateUI(){
         if (user != null) {
             // User is signed in
@@ -384,6 +351,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
             https://stackoverflow.com/questions/53332471/checking-if-a-document-exists-in-a-firestore-collection
              */
             if(checkInternetConnectivity()) {
+                // has internet connection, use firebase
                 // check if rider already has an active request
                 DocumentReference docIdRef = db.collection("Request").document(email);
                 docIdRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -409,6 +377,7 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
                 Log.i("have user", email);
             }
             else{
+                // does not have internet connection, use stored local data
                 SharedPreferences preferences = getSharedPreferences("localRequest", 0);
                 if(preferences.contains(email)){
                     Log.d(TAG, "Document exists!");
@@ -430,6 +399,10 @@ public class RiderMapsActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
+    /**
+     * check if has internet connection
+     * @return boolean whether has internet connection
+     */
     private Boolean checkInternetConnectivity(){
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
